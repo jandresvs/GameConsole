@@ -14,15 +14,22 @@ Leer en este orden:
 | [`04-eventos.md`](04-eventos.md) | Reglas para emitir eventos y qué eventos emite cada juego |
 | [`05-prolog.md`](05-prolog.md) | Contrato propuesto del servicio Prolog |
 | [`06-reparto.md`](06-reparto.md) | Tareas de cada uno, criterio de "listo" y calendario |
+| [`07-contrato-juegos.md`](07-contrato-juegos.md) | Cómo escribir un juego: la clase base `Game` y sus reglas |
 
 ## Estado actual (16 de noviembre)
 
-Hecho: el **esqueleto** (tarea 1 de Andrés). Hay una página de consola sin
-juegos, el proxy hacia GameStats y Prolog, un servicio Prolog que solo responde
-`/health`, el compose y un CI básico.
+Hecho:
 
-Sigue: la clase base de los juegos y la capa de eventos (Andrés), y el servicio
-Prolog con A\* (Jean), que no depende de lo anterior.
+- El **esqueleto** (A1): página de consola, proxy hacia GameStats y Prolog, un
+  servicio Prolog que solo responde `/health`, el compose y un CI básico.
+- El **contrato entre la consola y los juegos** (A2): la clase base `Game`, la
+  consola abre varias partidas a la vez o en otra pestaña, y hay un juego de
+  ejemplo solo para desarrollo. Ya se puede escribir un juego.
+
+Sigue: la capa de eventos que envía a GameStats (A3, Andrés), y el servicio
+Prolog con A\* (J1, Jean), que no depende de lo anterior. Con A2 hecho, Jean
+también puede empezar `chase` (J2); sus eventos se verán en pantalla, pero no
+llegarán a GameStats hasta que exista A3.
 
 ## Reglas de esta carpeta
 

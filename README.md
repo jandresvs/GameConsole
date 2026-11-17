@@ -6,8 +6,9 @@ Tres juegos orientados a objetos (**combat**, **racing** y **chase**), partidas
 en paralelo, una CPU que decide con **Prolog**, y estadísticas en vivo que vienen
 de [GameStats](https://github.com/ssanscarlos-rgb/GameStats), el proyecto 1.
 
-> **Estado: esqueleto.** La consola abre, el proxy y los servicios están
-> conectados, pero todavía no hay juegos ni panel. Los acuerdos del proyecto,
+> **Estado: en construcción.** La consola ya abre partidas (varias a la vez o
+> en otra pestaña) con un juego de ejemplo, pero todavía no están los tres
+> juegos, el envío de eventos a GameStats ni el panel. Los acuerdos del proyecto,
 > el reparto y lo que sigue están en [`contextos/`](contextos/README.md).
 
 ```
@@ -69,12 +70,15 @@ npm install
 npm run dev
 ```
 
-La consola queda en http://localhost:5173.
+La consola queda en http://localhost:5173. En desarrollo aparece además un
+juego de **Ejemplo**, que no forma parte de la entrega; en la versión de Docker
+se puede ver con http://localhost:3000/?demo
 
 | Comando (dentro de `console-web/`) | Qué hace |
 |---|---|
 | `npm run dev` | servidor de desarrollo |
 | `npm run build` | revisa los tipos (`tsc`) y genera `dist/` |
+| `npm test` | corre las pruebas automáticas |
 
 El servicio Prolog se puede correr sin Docker con `swipl server.pl` dentro de
 `ai-prolog/` (queda en el puerto 8082).

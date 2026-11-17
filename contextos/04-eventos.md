@@ -26,13 +26,16 @@ rechazaron, cada uno con su motivo.
 
 | Campo | Regla |
 |---|---|
-| `eventId` | Obligatorio y único. Usar `newId()` de `src/events/ids.ts`. |
+| `eventId` | Obligatorio y único. Lo arma la clase base: `<matchId>-<número>`. |
 | `timestamp` | Obligatorio, UTC terminado en `Z`. `new Date().toISOString()` ya lo cumple. |
 | `gameId` | Obligatorio, en minúsculas: `combat`, `racing` o `chase`. |
-| `matchId` | Obligatorio y único por partida. Propuesta: `<gameId>-<uuid>`. |
+| `matchId` | Obligatorio y único por partida. Lo arma la clase base: `<gameId>-<uuid>`. |
 | `type` | Obligatorio, `MAYUSCULAS_CON_GUION_BAJO`. |
 | `playerId` | Opcional; si va, no puede estar vacío. No va en `MATCH_STARTED` ni `MATCH_FINISHED`. |
 | `data` | Opcional; si va, es un objeto. Los números van como número, no como texto. |
+
+Los juegos no arman este JSON a mano: llaman a `this.emit(type, data, playerId)`
+y la clase base `Game` completa el resto (ver `07-contrato-juegos.md`).
 
 ## Reglas que hay que respetar
 

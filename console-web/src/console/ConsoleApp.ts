@@ -1,8 +1,13 @@
 import { API } from "../config";
+import { LocalEventSink } from "../events/LocalEventSink";
+import type { GameDefinition } from "../games/core/GameDefinition";
 import { ConnectionTest } from "../services/ConnectionTest";
 import { ServiceMonitor, type ServiceInfo, type ServiceState } from "../services/ServiceMonitor";
 import { el } from "./dom";
-import { GameCatalog, type GameEntry } from "./GameCatalog";
+import { EventLogView } from "./EventLogView";
+import { GameCatalog } from "./GameCatalog";
+import { PlayerProfile } from "./PlayerProfile";
+import { SessionManager } from "./SessionManager";
 
 const SERVICES: readonly ServiceInfo[] = [
   { id: "ingest", name: "GameStats · ingest (Go)", healthUrl: `${API.ingest}/health` },
@@ -17,12 +22,24 @@ const STATE_LABEL: Record<ServiceState, string> = {
 };
 
 /**
- * La consola: la pantalla principal desde la que se eligen los juegos.
- * Por ahora es el esqueleto: muestra el estado de los servicios, el catálogo
- * (sin juegos jugables todavía) y una prueba de conexión temporal.
+ * La consola: la pantalla principal. Ofrece los juegos del catálogo, abre
+ * partidas (varias a la vez, o en otra pestaña) y muestra el estado de los
+ * servicios. No conoce ningún juego en particular: trabaja con GameDefinition
+ * y con la clase base Game.
+ *
+ * Parámetros de la dirección:
+ *   ?game=<id>  abre una partida de ese juego al cargar (así funciona "otra pestaña")
+ *   ?demo       incluye el juego de ejemplo fuera del modo desarrollo
  */
 export class ConsoleApp {
-  private readonly catalog = new GameCatalog();
+  private readonly params = new URLSearchParams(window.location.search);
+  private readonly catalog = new GameCatalog(import.meta.env.DEV || this.params.has("demo"));
+  private readonly player = new PlayerProfile();
+
+  // TEMPORAL: cuando exista la capa de eventos (A3), aquí va el EventSink que envía a GameStats.
+  private readonly eventSink = new LocalEventSink();
+
+  private readonly sessions = new SessionManager(() => ({ playerId: this.player.id, events: this.eventSink }));
   private readonly connectionTest = new ConnectionTest();
   private readonly badges = new Map<string, HTMLElement>();
   private readonly monitor = new ServiceMonitor(SERVICES, (service, state) => this.showState(service, state));
@@ -34,18 +51,45 @@ export class ConsoleApp {
       this.header(),
       this.servicesSection(),
       this.gamesSection(),
+      this.section("Partidas abiertas", this.sessions.element),
       this.dashboardSection(),
+      this.eventLogSection(),
       this.connectionSection(),
     );
     this.monitor.start();
+
+    // Al cerrar o salir de la pestaña, las partidas en curso se dan por abandonadas.
+    window.addEventListener("pagehide", () => this.sessions.abandonAll());
+
+    const requested = this.catalog.find(this.params.get("game") ?? "");
+    if (requested) this.sessions.open(requested);
   }
 
   private header(): HTMLElement {
+    const input = el("input");
+    input.type = "text";
+    input.value = this.player.id;
+    input.maxLength = 20;
+    input.spellcheck = false;
+    input.autocomplete = "off";
+    input.id = "player-name";
+    input.addEventListener("change", () => {
+      input.value = this.player.rename(input.value);
+    });
+
+    const label = el("label", "", "Jugador");
+    label.htmlFor = input.id;
+
     return el(
       "header",
       "top",
-      el("h1", "", "GameConsole"),
-      el("p", "muted", "Tres juegos, partidas en paralelo y estadísticas en vivo desde GameStats."),
+      el(
+        "div",
+        "",
+        el("h1", "", "GameConsole"),
+        el("p", "muted", "Tres juegos, partidas en paralelo y estadísticas en vivo desde GameStats."),
+      ),
+      el("div", "player", label, input),
     );
   }
 
@@ -72,26 +116,50 @@ export class ConsoleApp {
     return this.section("Juegos", grid);
   }
 
-  private gameCard(game: GameEntry): HTMLElement {
+  private gameCard(game: GameDefinition): HTMLElement {
+    const ready = game.create !== undefined;
+
     const play = el("button", "", "Nueva partida");
+    play.disabled = !ready;
+    play.addEventListener("click", () => this.sessions.open(game));
+
     const tab = el("button", "secondary", "Abrir en otra pestaña");
-    // Se habilitan cuando el juego esté implementado (game.status === "listo").
-    play.disabled = tab.disabled = game.status !== "listo";
+    tab.disabled = !ready;
+    tab.addEventListener("click", () => window.open(this.urlFor(game), "_blank", "noopener"));
 
     return el(
       "article",
       "card",
       el("div", "card-head", el("h3", "", game.title), el("code", "", game.id)),
       el("p", "muted", game.description),
-      el("p", "status", game.status === "listo" ? "Listo" : "En desarrollo"),
+      el("p", "status", ready ? "Listo" : "En desarrollo"),
       el("div", "actions", play, tab),
     );
+  }
+
+  /** La dirección de esta misma consola que abre directamente una partida del juego. */
+  private urlFor(game: GameDefinition): string {
+    const url = new URL(window.location.href);
+    url.searchParams.set("game", game.id);
+    return url.toString();
   }
 
   private dashboardSection(): HTMLElement {
     return this.section(
       "Panel de estadísticas",
       el("p", "muted", "Pendiente. Mostrará las estadísticas por juego y generales que devuelva GameStats."),
+    );
+  }
+
+  private eventLogSection(): HTMLElement {
+    return this.section(
+      "Eventos emitidos (temporal)",
+      el(
+        "p",
+        "muted",
+        "Lo que emiten las partidas de esta pestaña. Todavía no se envía a GameStats: falta la capa de eventos.",
+      ),
+      new EventLogView(this.eventSink).element,
     );
   }
 

@@ -12,6 +12,8 @@
 | Mecánica de `chase` | **Carrera contra la CPU**: el usuario y una segunda Buena controlada por Prolog compiten por alcanzar primero a La Mala | Cumple "usuario contra computadora" y, según el código del analizador de Scala, funciona sin cambiarlo porque ya calcula por jugador. |
 | Repositorio | Repo nuevo `GameConsole`; GameStats se usa como **imágenes publicadas** | Mantiene a GameStats como plataforma externa. |
 | Deployment | Imágenes en ghcr.io por release, más `docker compose` | Lo mismo que se hizo en GameStats. |
+| Identidad del jugador | El usuario escribe un nombre en la consola; se normaliza (minúsculas, sin tildes ni espacios), se guarda en el navegador y se usa como `playerId` | Simple y suficiente; no hay cuentas ni contraseñas. |
+| Identificadores de eventos | `matchId` = `<gameId>-<uuid>`; `eventId` = `<matchId>-<número>` | El mismo formato de `eventId` que usa el simulador de GameStats: legible y único. |
 | Identificadores en el código | En inglés; comentarios, textos y documentación en español | Igual que en GameStats. |
 
 ### Alternativa descartada para `chase`
@@ -49,8 +51,6 @@ Queda como mejora solo si sobra tiempo.
 - **Reparto de tareas:** hay una propuesta en `06-reparto.md`; falta confirmarla.
 - **Código Prolog anterior:** Jean tiene el A\* del proyecto Java + Prolog; falta
   traerlo y adaptarlo al contrato de `05-prolog.md`.
-- **Identidad del jugador:** propuesta: el usuario escribe un nombre en la
-  consola, se guarda en el navegador y se usa como `playerId`.
 - **Dónde se despliega:** falta definir la máquina o el entorno.
 - **Lenguaje:** el enunciado da libertad explícita. Si el profesor espera un
   lenguaje orientado a objetos "clásico", hay que saberlo ya.

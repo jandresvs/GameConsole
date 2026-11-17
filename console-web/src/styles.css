@@ -77,3 +77,31 @@ button:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
 }
 .output.ok { border-color: var(--ok); }
 .output.fail { border-color: var(--fail); }
+
+/* Encabezado con el nombre del jugador */
+.top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 1rem; }
+.player { display: flex; flex-direction: column; gap: 0.25rem; }
+.player label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.player input {
+  font: inherit;
+  width: 12rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+}
+.player input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* Partidas abiertas: cada una en su recuadro, una al lado de otra si caben */
+.sessions { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-start; }
+.session { display: flex; flex-direction: column; gap: 0.5rem; padding: 0.9rem; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); max-width: 100%; }
+.session-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.6rem; }
+.session-head .badge { margin-left: auto; }
+.small { font-size: 0.85rem; }
+
+.game-canvas { display: block; max-width: 100%; height: auto; border-radius: 6px; border: 2px solid var(--border); background: #0e1016; }
+/* El borde marca qué partida tiene el foco, es decir, cuál recibe el teclado. */
+.game-canvas:focus { outline: none; border-color: var(--accent); }
+
+.output.log { max-height: 16rem; overflow-y: auto; white-space: pre; overflow-x: auto; }
