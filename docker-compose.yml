@@ -1,0 +1,105 @@
+# GameConsole completo con un solo comando:
+#
+#   docker compose up -d --build     # construye la consola y Prolog, descarga GameStats y levanta todo
+#   docker compose ps                # analyzer, ingest, prolog y console deben decir "healthy"
+#   docker compose logs -f console   # ver la salida de un servicio
+#   docker compose down              # apagar y borrar los contenedores
+#
+# Después: consola en http://localhost:3000
+#
+# GameStats no se compila aquí: se usan las imágenes que publica su pipeline
+# (ghcr.io). La versión se cambia con GAMESTATS_VERSION, por ejemplo:
+#   GAMESTATS_VERSION=v1.1 docker compose up -d
+
+name: gameconsole
+
+services:
+  # GameStats, módulo de análisis (Scala). Guarda y expone los resultados.
+  analyzer:
+    image: ghcr.io/ssanscarlos-rgb/gamestats-analyzer:${GAMESTATS_VERSION:-v1.0}
+    platform: linux/amd64          # las imágenes publicadas son amd64; en Mac con chip Apple corren emuladas
+    ports:
+      - "8081:8081"
+    healthcheck:
+      # La imagen de Java no trae curl ni wget: se pide /health con bash (/dev/tcp).
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8081 && printf 'GET /health HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q ok <&3"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+
+  # GameStats, módulo de ingestión (Go). Aquí llegan los eventos de los juegos.
+  ingest:
+    image: ghcr.io/ssanscarlos-rgb/gamestats-go:${GAMESTATS_VERSION:-v1.0}
+    platform: linux/amd64
+    environment:
+      ANALYZER_URL: http://analyzer:8081
+      # GameStats cierra una partida tras este tiempo sin eventos. Su valor por
+      # defecto (30s) es para el simulador; una persona puede quedarse quieta más
+      # que eso, y los eventos posteriores se descartarían como tardíos.
+      IDLE_TIMEOUT: ${IDLE_TIMEOUT:-5m}
+    ports:
+      - "8080:8080"
+    depends_on:
+      analyzer:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 6
+    restart: unless-stopped
+
+  # Inteligencia de juego en SWI-Prolog (la CPU del juego chase).
+  prolog:
+    build: ./ai-prolog
+    image: gameconsole-prolog
+    init: true                     # reenvía la señal de apagado: "down" no espera 10 s
+    environment:
+      PORT: "8082"
+    ports:
+      - "8082:8082"
+    healthcheck:
+      # La imagen de SWI-Prolog tampoco trae curl ni wget.
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8082 && printf 'GET /health HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q ok <&3"]
+      interval: 5s
+      timeout: 3s
+      retries: 6
+    restart: unless-stopped
+
+  # La consola: nginx con la página (TypeScript ya compilado) y el proxy /api/...
+  console:
+    build: ./console-web
+    image: gameconsole-web
+    ports:
+      - "${CONSOLE_PORT:-3000}:80"
+    depends_on:
+      ingest:
+        condition: service_healthy
+      prolog:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 6
+    restart: unless-stopped
+
+  # Panel original de GameStats. No es parte de la entrega: sirve para depurar
+  # (muestra los eventos rechazados y el recorrido de cada evento). Solo a pedido:
+  #   docker compose --profile debug up -d     →  http://localhost:8090
+  gamestats-dashboard:
+    image: ghcr.io/ssanscarlos-rgb/gamestats-go:${GAMESTATS_VERSION:-v1.0}
+    platform: linux/amd64
+    command: ["/app/dashboard"]
+    environment:
+      PORT: "8090"
+      INGEST_URL: http://ingest:8080
+      ANALYZER_URL: http://analyzer:8081
+    ports:
+      - "8090:8090"
+    depends_on:
+      ingest:
+        condition: service_healthy
+    profiles: ["debug"]

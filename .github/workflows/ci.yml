@@ -1,0 +1,34 @@
+# Integración continua: en cada push y pull request compila la consola
+# (TypeScript + Vite) y construye las imágenes Docker propias del proyecto.
+#
+# Pendiente (tarea de CI/CD): levantar el compose completo con una prueba de
+# humo y publicar las imágenes en ghcr.io en cada release, como en GameStats.
+name: CI
+on:
+  push:
+  pull_request:
+
+jobs:
+  web:
+    name: Consola (TypeScript)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: console-web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: console-web/package-lock.json
+      - run: npm ci
+      - run: npm run build     # tsc --noEmit (tipos) + vite build
+
+  images:
+    name: Imágenes Docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Construir la consola y Prolog
+        run: docker compose build console prolog
