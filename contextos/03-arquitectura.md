@@ -63,8 +63,8 @@ GameConsole/
 │       │   ├── core/           clase base Game, GameDefinition y teclado
 │       │   ├── example/        juego de ejemplo (solo desarrollo)
 │       │   └── combat/, racing/, chase/   (por crear) una carpeta por juego
-│       ├── events/             eventos por partida (MatchEvents) y la interfaz EventSink
-│       ├── services/           estado de los servicios; prueba de conexión (temporal)
+│       ├── events/             eventos por partida (MatchEvents) y su envío a GameStats (HttpEventSink)
+│       ├── services/           estado de los servicios
 │       └── dashboard/          (por crear) panel de estadísticas
 ├── ai-prolog/                  servicio Prolog
 │   ├── Dockerfile

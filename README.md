@@ -7,8 +7,8 @@ en paralelo, una CPU que decide con **Prolog**, y estadísticas en vivo que vien
 de [GameStats](https://github.com/ssanscarlos-rgb/GameStats), el proyecto 1.
 
 > **Estado: en construcción.** La consola ya abre partidas (varias a la vez o
-> en otra pestaña) con un juego de ejemplo, pero todavía no están los tres
-> juegos, el envío de eventos a GameStats ni el panel. Los acuerdos del proyecto,
+> en otra pestaña) y envía sus eventos a GameStats, pero todavía no están los
+> tres juegos ni el panel. Los acuerdos del proyecto,
 > el reparto y lo que sigue están en [`contextos/`](contextos/README.md).
 
 ```
@@ -32,8 +32,8 @@ docker compose ps
 Los cuatro servicios deben decir `healthy`. Luego abrir **http://localhost:3000**.
 
 - La sección **Servicios** debe mostrar los tres "en línea".
-- El botón **Enviar evento de prueba** manda una partida mínima a GameStats por
-  el proxy y muestra la respuesta. Es temporal.
+- La sección **Envío de eventos** muestra cuántos eventos aceptó GameStats y si
+  hay algo en cola o reintentándose.
 
 Apagar:
 

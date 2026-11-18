@@ -11,6 +11,8 @@ export interface GameDefinition {
   readonly description: string;
   /** Cómo se juega, en una línea. Se muestra debajo de cada partida. */
   readonly controls?: string;
+  /** true = sus eventos solo se muestran en pantalla, no se envían a GameStats (para el juego de ejemplo). */
+  readonly localOnly?: boolean;
   /** Crea una partida nueva. Si falta, el juego aparece como "en desarrollo". */
   readonly create?: (context: GameContext) => Game;
 }

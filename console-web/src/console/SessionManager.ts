@@ -13,15 +13,15 @@ export class SessionManager {
   private readonly empty = el("p", "muted", "No hay partidas abiertas. Elige un juego arriba.");
   private readonly views = new Set<GameSessionView>();
 
-  /** newContext se llama al abrir cada partida, para tomar el nombre de jugador vigente. */
-  constructor(private readonly newContext: () => GameContext) {
+  /** newContext se llama al abrir cada partida: toma el nombre de jugador vigente y el destino de eventos del juego. */
+  constructor(private readonly newContext: (definition: GameDefinition) => GameContext) {
     this.element.append(this.empty);
   }
 
   open(definition: GameDefinition): void {
     if (!definition.create) return;
 
-    const game = definition.create(this.newContext());
+    const game = definition.create(this.newContext(definition));
     const view = new GameSessionView(definition, game, (v) => this.close(v));
     this.views.add(view);
     this.empty.remove();

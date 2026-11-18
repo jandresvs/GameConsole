@@ -11,7 +11,7 @@ Cada tarea tiene un criterio de "listo" para saber cuándo soltarla.
 |---|---|---|---|
 | A1 | **Esqueleto**: repo, proyecto TypeScript, nginx, compose con GameStats, página de la consola | Con `docker compose up`, un evento enviado desde el navegador aparece en `/status` del ingest | Hecho (falta probarlo con Docker; ver el README) |
 | A2 | **Contrato entre consola y juegos**: clase base `Game` (ciclo de vida, `matchId`, actualizar, dibujar) e interfaz `EventSender` | Jean puede escribir `ChaseGame` sin preguntar; queda explicado en esta carpeta | Hecho: ver `07-contrato-juegos.md` |
-| A3 | **Capa de eventos**: arma los eventos, los encola, los envía por lotes en segundo plano y reintenta con el mismo `eventId` | Dos partidas simultáneas envían eventos y `/rejected` queda vacío | Pendiente |
+| A3 | **Capa de eventos**: arma los eventos, los encola, los envía por lotes en segundo plano y reintenta con el mismo `eventId` | Dos partidas simultáneas envían eventos y `/rejected` queda vacío | Hecho: `HttpEventSink` |
 | A4 | **Juego `racing`**: el usuario contra dos o tres pilotos automáticos | Al terminar una carrera, Scala muestra vueltas, choques y patrones | Pendiente |
 | A5 | **Juego `combat`**: el usuario contra bots en una arena | Scala calcula K/D y precisión de la partida | Pendiente |
 | A6 | **Instancias por juego en Go**: partidas abiertas y entregadas por `gameId` en `/status` | Abrir una partida sube el contador de su juego antes de que termine | Pendiente |
@@ -22,7 +22,7 @@ Cada tarea tiene un criterio de "listo" para saber cuándo soltarla.
 | # | Tarea | Listo cuando | Estado |
 |---|---|---|---|
 | J1 | **Servicio Prolog**: A\* con el contrato de `05-prolog.md` | Responde bien con `curl` a un tablero con ruta y a uno sin ruta | Pendiente (se puede empezar ya) |
-| J2 | **Juego `chase`**: tablero, La Mala fija, el usuario contra la CPU guiada por Prolog | Una partida completa aparece en Scala con estadísticas de los dos jugadores | Pendiente (se puede empezar; para llegar a GameStats necesita A3) |
+| J2 | **Juego `chase`**: tablero, La Mala fija, el usuario contra la CPU guiada por Prolog | Una partida completa aparece en Scala con estadísticas de los dos jugadores | Pendiente (ya tiene todo lo que necesita de la consola) |
 | J3 | **Resumen por juego en Scala**: `GET /results/games` con datos por juego y totales | El panel muestra "por juego" y "general" sin sumar nada por su cuenta | Pendiente |
 | J4 | **Panel de estadísticas** dentro de la consola, con consulta periódica | Los números cambian mientras hay partidas abiertas, sin recargar | Pendiente |
 

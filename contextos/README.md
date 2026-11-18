@@ -24,12 +24,13 @@ Hecho:
   servicio Prolog que solo responde `/health`, el compose y un CI básico.
 - El **contrato entre la consola y los juegos** (A2): la clase base `Game`, la
   consola abre varias partidas a la vez o en otra pestaña, y hay un juego de
-  ejemplo solo para desarrollo. Ya se puede escribir un juego.
+  ejemplo solo para desarrollo.
+- La **capa de eventos** (A3): los eventos de los juegos ya llegan a GameStats,
+  con cola, envío por lotes, reintentos y envío al cerrar la pestaña.
 
-Sigue: la capa de eventos que envía a GameStats (A3, Andrés), y el servicio
-Prolog con A\* (J1, Jean), que no depende de lo anterior. Con A2 hecho, Jean
-también puede empezar `chase` (J2); sus eventos se verán en pantalla, pero no
-llegarán a GameStats hasta que exista A3.
+Con esto ya se puede escribir un juego completo y ver sus estadísticas en
+GameStats. Sigue: `racing` y `combat` (A4 y A5, Andrés), y el servicio Prolog
+con A\* y `chase` (J1 y J2, Jean).
 
 ## Reglas de esta carpeta
 

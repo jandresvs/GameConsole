@@ -135,19 +135,29 @@ otra pestaña**. Cada juego va en su carpeta: `src/games/racing/`,
 
 - `npm run dev` y abrir http://localhost:5173. En desarrollo aparece una cuarta
   tarjeta, **Ejemplo**, para ver el contrato funcionando.
-- La sección **Eventos emitidos** muestra en vivo lo que emite cada partida de
-  la pestaña (la hora sale en UTC).
+- La sección **Envío de eventos** muestra en vivo lo que emite cada partida de
+  la pestaña (la hora sale en UTC) y si GameStats lo está aceptando.
 - `npm test` corre las pruebas automáticas.
 - En la versión de Docker el ejemplo no aparece, porque la entrega lleva
   exactamente tres juegos. Para verlo ahí: http://localhost:3000/?demo
 
-## Lo que falta (tarea A3)
+## Cómo llegan los eventos a GameStats
 
-Los eventos todavía **no llegan a GameStats**. Hoy van a `LocalEventSink`, que
-solo los muestra en pantalla. La capa de eventos lo reemplaza por un `EventSink`
-que encola, envía por lotes a `/api/ingest/events` y reintenta. Es un cambio de
-una línea en `ConsoleApp.ts`; los juegos no se enteran.
+El juego no hace nada especial: `this.emit(...)` entrega el evento a un
+`EventSink` y ahí termina su parte. La consola conecta dos destinos:
 
-Para esa tarea: al cerrar la pestaña, la consola abandona las partidas en curso
-y emite sus últimos eventos en ese momento, así que el envío tiene que poder
-salir aunque la página se esté cerrando.
+- **`HttpEventSink`** (`src/events/HttpEventSink.ts`): encola el evento y lo
+  envía por lotes a `/api/ingest/events`. Si la red falla o GameStats no
+  responde, reintenta el mismo lote con esperas crecientes. Al cerrar la
+  pestaña manda lo pendiente con una petición que sobrevive al cierre.
+- **`LocalEventSink`**: guarda los últimos eventos para mostrarlos en la
+  sección **Envío de eventos** de la consola.
+
+En esa sección también se ve el estado del envío: cuántos eventos hay en cola,
+cuántos aceptó o rechazó GameStats y cuántos reintentos hubo. Si un juego emite
+un evento mal formado, GameStats lo rechaza y el motivo sale en la consola del
+navegador y en `GET /api/ingest/rejected`.
+
+El juego de ejemplo lleva `localOnly: true` en su definición: sus eventos solo
+se muestran en pantalla, para que `example` no aparezca en las estadísticas.
+Los tres juegos reales **no** deben llevar esa bandera.

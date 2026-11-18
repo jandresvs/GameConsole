@@ -1,8 +1,10 @@
 import { API } from "../config";
+import { FanOutEventSink } from "../events/FanOutEventSink";
+import { HttpEventSink } from "../events/HttpEventSink";
 import { LocalEventSink } from "../events/LocalEventSink";
 import type { GameDefinition } from "../games/core/GameDefinition";
-import { ConnectionTest } from "../services/ConnectionTest";
 import { ServiceMonitor, type ServiceInfo, type ServiceState } from "../services/ServiceMonitor";
+import { DeliveryStatusView } from "./DeliveryStatusView";
 import { el } from "./dom";
 import { EventLogView } from "./EventLogView";
 import { GameCatalog } from "./GameCatalog";
@@ -36,11 +38,15 @@ export class ConsoleApp {
   private readonly catalog = new GameCatalog(import.meta.env.DEV || this.params.has("demo"));
   private readonly player = new PlayerProfile();
 
-  // TEMPORAL: cuando exista la capa de eventos (A3), aquí va el EventSink que envía a GameStats.
-  private readonly eventSink = new LocalEventSink();
+  // Los eventos van a dos destinos: a GameStats (por el proxy) y al registro en pantalla.
+  private readonly eventLog = new LocalEventSink();
+  private readonly delivery = new HttpEventSink({ url: `${API.ingest}/events` });
+  private readonly eventSink = new FanOutEventSink(this.delivery, this.eventLog);
 
-  private readonly sessions = new SessionManager(() => ({ playerId: this.player.id, events: this.eventSink }));
-  private readonly connectionTest = new ConnectionTest();
+  private readonly sessions = new SessionManager((game) => ({
+    playerId: this.player.id,
+    events: game.localOnly ? this.eventLog : this.eventSink,
+  }));
   private readonly badges = new Map<string, HTMLElement>();
   private readonly monitor = new ServiceMonitor(SERVICES, (service, state) => this.showState(service, state));
 
@@ -53,13 +59,16 @@ export class ConsoleApp {
       this.gamesSection(),
       this.section("Partidas abiertas", this.sessions.element),
       this.dashboardSection(),
-      this.eventLogSection(),
-      this.connectionSection(),
+      this.eventsSection(),
     );
     this.monitor.start();
 
-    // Al cerrar o salir de la pestaña, las partidas en curso se dan por abandonadas.
-    window.addEventListener("pagehide", () => this.sessions.abandonAll());
+    // Al cerrar o salir de la pestaña, las partidas en curso se dan por abandonadas
+    // y lo que quede en cola se envía con una petición que sobrevive al cierre.
+    window.addEventListener("pagehide", () => {
+      this.sessions.abandonAll();
+      this.delivery.flushOnExit();
+    });
 
     const requested = this.catalog.find(this.params.get("game") ?? "");
     if (requested) this.sessions.open(requested);
@@ -151,42 +160,12 @@ export class ConsoleApp {
     );
   }
 
-  private eventLogSection(): HTMLElement {
+  private eventsSection(): HTMLElement {
     return this.section(
-      "Eventos emitidos (temporal)",
-      el(
-        "p",
-        "muted",
-        "Lo que emiten las partidas de esta pestaña. Todavía no se envía a GameStats: falta la capa de eventos.",
-      ),
-      new EventLogView(this.eventSink).element,
-    );
-  }
-
-  private connectionSection(): HTMLElement {
-    const output = el("pre", "output", "Aún no se ha ejecutado.");
-    const button = el("button", "secondary", "Enviar evento de prueba");
-
-    button.addEventListener("click", () => {
-      button.disabled = true;
-      output.textContent = "Enviando…";
-      void this.connectionTest.run().then((result) => {
-        output.textContent = result.lines.join("\n");
-        output.className = `output ${result.ok ? "ok" : "fail"}`;
-        button.disabled = false;
-      });
-    });
-
-    return this.section(
-      "Prueba de conexión (temporal)",
-      el(
-        "p",
-        "muted",
-        "Envía una partida mínima del juego ficticio «prueba» a GameStats, pasando por el proxy. " +
-          "Sirve para comprobar el esqueleto y se quitará cuando exista la capa de eventos.",
-      ),
-      button,
-      output,
+      "Envío de eventos",
+      new DeliveryStatusView(this.delivery).element,
+      el("p", "muted small", "Últimos eventos emitidos por las partidas de esta pestaña (hora en UTC):"),
+      new EventLogView(this.eventLog).element,
     );
   }
 

@@ -3,9 +3,10 @@ import type { EventSink, GameEvent } from "./GameEvent";
 type Listener = (event: GameEvent) => void;
 
 /**
- * TEMPORAL: EventSink que no envía nada a GameStats. Guarda los últimos eventos
- * y avisa a quien esté escuchando, para ver en la consola lo que emite un juego
- * mientras se desarrolla. Lo reemplaza la capa de eventos real (tarea A3).
+ * EventSink que no envía nada: guarda los últimos eventos y avisa a quien esté
+ * escuchando. La consola lo usa para mostrar en pantalla lo que emiten las
+ * partidas, junto al envío real (HttpEventSink). Para el juego de ejemplo es
+ * el único destino.
  */
 export class LocalEventSink implements EventSink {
   private readonly recent: GameEvent[] = [];
