@@ -1,4 +1,5 @@
 import { API } from "../config";
+import { Dashboard } from "../dashboard/Dashboard";
 import { FanOutEventSink } from "../events/FanOutEventSink";
 import { HttpEventSink } from "../events/HttpEventSink";
 import { LocalEventSink } from "../events/LocalEventSink";
@@ -47,6 +48,8 @@ export class ConsoleApp {
     playerId: this.player.id,
     events: game.localOnly ? this.eventLog : this.eventSink,
   }));
+  // El panel muestra los juegos de la entrega (no el de ejemplo), aunque todavía no tengan partidas.
+  private readonly dashboard = new Dashboard(this.catalog.all().filter((g) => !g.localOnly).map((g) => g.id));
   private readonly badges = new Map<string, HTMLElement>();
   private readonly monitor = new ServiceMonitor(SERVICES, (service, state) => this.showState(service, state));
 
@@ -62,6 +65,7 @@ export class ConsoleApp {
       this.eventsSection(),
     );
     this.monitor.start();
+    this.dashboard.start();
 
     // Al cerrar o salir de la pestaña, las partidas en curso se dan por abandonadas
     // y lo que quede en cola se envía con una petición que sobrevive al cierre.
@@ -154,10 +158,8 @@ export class ConsoleApp {
   }
 
   private dashboardSection(): HTMLElement {
-    return this.section(
-      "Panel de estadísticas",
-      el("p", "muted", "Pendiente. Mostrará las estadísticas por juego y generales que devuelva GameStats."),
-    );
+    // Los números vienen de GameStats (se consultan cada 2 s); la consola no calcula nada.
+    return this.section("Panel de estadísticas", this.dashboard.element());
   }
 
   private eventsSection(): HTMLElement {

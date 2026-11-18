@@ -15,6 +15,7 @@ Leer en este orden:
 | [`05-prolog.md`](05-prolog.md) | Contrato propuesto del servicio Prolog |
 | [`06-reparto.md`](06-reparto.md) | Tareas de cada uno, criterio de "listo" y calendario |
 | [`07-contrato-juegos.md`](07-contrato-juegos.md) | Cómo escribir un juego: la clase base `Game` y sus reglas |
+| [`08-chase.md`](08-chase.md) | Reglas y clases del juego `chase` |
 
 ## Estado actual (18 de noviembre)
 
@@ -32,8 +33,14 @@ Hecho:
 - **`combat`** (A5): todos contra todos en una arena, el usuario contra tres
   bots, hasta 8 eliminaciones.
 
-Sigue: el servicio Prolog con A\* y `chase` (J1 y J2, Jean); instancias por
-juego en Go y CI/CD (A6 y A7, Andrés).
+- **El servicio Prolog, `chase` y el panel** (J1, J2 y J4, Jean): A\* en
+  `ai-prolog/route.pl`, `chase` contra la CPU que decide con Prolog, y el panel
+  de estadísticas que consulta GameStats cada 2 s. `chase` ya está integrado
+  sobre la clase `Game` y la capa de eventos.
+
+Sigue: GameStats v1.1 con el resumen por juego en Scala (J3, ya escrito) y las
+instancias por juego en Go (A6), que el panel necesita; CI/CD y deployment (A7);
+prueba de concurrencia, documentación y video.
 
 ## Reglas de esta carpeta
 

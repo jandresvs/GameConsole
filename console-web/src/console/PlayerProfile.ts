@@ -1,6 +1,8 @@
 const STORAGE_KEY = "gameconsole.playerId";
 const DEFAULT_ID = "jugador";
 const MAX_LENGTH = 20;
+/** playerId que usan la CPU de chase y los bots: el usuario no puede llamarse igual. */
+const RESERVED = new Set(["cpu", "bot-1", "bot-2", "bot-3"]);
 
 /**
  * El jugador humano de esta consola. Su id se usa como playerId en los eventos
@@ -28,7 +30,10 @@ export class PlayerProfile {
     return this.current;
   }
 
-  /** Deja un id corto, en minúsculas, sin tildes ni espacios: "José Luis" → "jose-luis". */
+  /**
+   * Deja un id corto, en minúsculas, sin tildes ni espacios: "José Luis" → "jose-luis".
+   * Si coincide con el de la CPU o un bot ("cpu", "bot-1"…), le agrega "_1".
+   */
   static clean(raw: string): string {
     const id = raw
       .normalize("NFD")
@@ -38,7 +43,8 @@ export class PlayerProfile {
       .replace(/\s+/g, "-")
       .replace(/[^a-z0-9_-]/g, "")
       .slice(0, MAX_LENGTH);
-    return id || DEFAULT_ID;
+    if (!id) return DEFAULT_ID;
+    return RESERVED.has(id) ? `${id}_1` : id;
   }
 
   private load(): string | null {

@@ -64,13 +64,15 @@ GameConsole/
 │       │   ├── example/        juego de ejemplo (solo desarrollo)
 │       │   ├── racing/         racing: pista, autos, reglas de carrera y dibujo
 │       │   ├── combat/         combat: arena, armas, luchadores, reglas y dibujo
-│       │   └── chase/          (por crear)
+│       │   └── chase/          chase: tablero, corredores, cliente de Prolog y reglas
 │       ├── events/             eventos por partida (MatchEvents) y su envío a GameStats (HttpEventSink)
 │       ├── services/           estado de los servicios
-│       └── dashboard/          (por crear) panel de estadísticas
+│       └── dashboard/          panel de estadísticas (consulta GameStats cada 2 s)
 ├── ai-prolog/                  servicio Prolog
 │   ├── Dockerfile
-│   └── server.pl               por ahora solo /health
+│   ├── server.pl               servidor HTTP: /health y /route
+│   ├── route.pl                A* (la búsqueda)
+│   └── test_route.pl           pruebas de route.pl
 └── .github/workflows/ci.yml    compila la consola y construye las imágenes
 ```
 

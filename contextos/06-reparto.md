@@ -21,12 +21,17 @@ Cada tarea tiene un criterio de "listo" para saber cuándo soltarla.
 
 | # | Tarea | Listo cuando | Estado |
 |---|---|---|---|
-| J1 | **Servicio Prolog**: A\* con el contrato de `05-prolog.md` | Responde bien con `curl` a un tablero con ruta y a uno sin ruta | Pendiente (se puede empezar ya) |
-| J2 | **Juego `chase`**: tablero, La Mala fija, el usuario contra la CPU guiada por Prolog | Una partida completa aparece en Scala con estadísticas de los dos jugadores | Pendiente (ya tiene todo lo que necesita de la consola) |
-| J3 | **Resumen por juego en Scala**: `GET /results/games` con datos por juego y totales | El panel muestra "por juego" y "general" sin sumar nada por su cuenta | Pendiente |
-| J4 | **Panel de estadísticas** dentro de la consola, con consulta periódica | Los números cambian mientras hay partidas abiertas, sin recargar | Pendiente |
+| J1 | **Servicio Prolog**: A\* con el contrato de `05-prolog.md` | Responde bien con `curl` a un tablero con ruta y a uno sin ruta | Hecho (falta probarlo con Docker) |
+| J2 | **Juego `chase`**: tablero, La Mala fija, el usuario contra la CPU guiada por Prolog | Una partida completa aparece en Scala con estadísticas de los dos jugadores | Juego hecho e integrado sobre la clase `Game` y la capa de eventos (ver `08-chase.md`); falta verlo en Scala |
+| J3 | **Resumen por juego en Scala**: `GET /results/games` con datos por juego y totales | El panel muestra "por juego" y "general" sin sumar nada por su cuenta | Escrito en `GameStats` (`/results/games`, contrato 3.5 y 4.3); falta compilarlo y correr `sbt test` |
+| J4 | **Panel de estadísticas** dentro de la consola, con consulta periódica | Los números cambian mientras hay partidas abiertas, sin recargar | Hecho en `console-web/src/dashboard/` (consulta cada 2 s); falta verlo con partidas reales |
 
 Notas:
+
+- **Formato que el panel espera de A6** (para acordarlo con Andrés): `GET /status` →
+  `pipeline.games` = `{ "chase": { "opened": 3, "delivered": 2 }, ... }`, donde `opened` son
+  las partidas abiertas desde que arrancó el ingest (incluye las en curso) y `delivered` las
+  ya entregadas a Scala. Mientras no exista, el panel muestra «—» en instancias.
 
 - J1 no depende de nada: el servicio solo recibe un estado y devuelve una ruta.
 - Para J4 se puede adaptar buena parte del panel de GameStats

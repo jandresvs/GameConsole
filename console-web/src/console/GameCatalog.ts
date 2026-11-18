@@ -1,3 +1,4 @@
+import { ChaseGame } from "../games/chase/ChaseGame";
 import { CombatGame } from "../games/combat/CombatGame";
 import type { GameDefinition } from "../games/core/GameDefinition";
 import { ExampleGame } from "../games/example/ExampleGame";
@@ -5,18 +6,13 @@ import { RacingGame } from "../games/racing/RacingGame";
 
 /**
  * Los juegos que la consola ofrece. Para agregar uno: importar su definición
- * y ponerla en la lista. Mientras una entrada no tenga `create`, el juego
- * aparece como "en desarrollo".
+ * y ponerla en la lista. Una entrada sin `create` aparece como "en desarrollo".
  */
 export class GameCatalog {
   private readonly definitions: GameDefinition[] = [
     CombatGame.definition,
     RacingGame.definition,
-    {
-      id: "chase",
-      title: "Chase",
-      description: "La Buena vs La Mala: carrera contra una CPU que decide su ruta con Prolog (A*).",
-    },
+    ChaseGame.definition,
   ];
 
   /** includeExample agrega el juego de ejemplo; la entrega lleva exactamente tres juegos. */
