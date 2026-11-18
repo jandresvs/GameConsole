@@ -1,3 +1,4 @@
+import { CombatGame } from "../games/combat/CombatGame";
 import type { GameDefinition } from "../games/core/GameDefinition";
 import { ExampleGame } from "../games/example/ExampleGame";
 import { RacingGame } from "../games/racing/RacingGame";
@@ -9,11 +10,7 @@ import { RacingGame } from "../games/racing/RacingGame";
  */
 export class GameCatalog {
   private readonly definitions: GameDefinition[] = [
-    {
-      id: "combat",
-      title: "Combat",
-      description: "Arena vista desde arriba: disparos, daño y eliminaciones contra bots.",
-    },
+    CombatGame.definition,
     RacingGame.definition,
     {
       id: "chase",

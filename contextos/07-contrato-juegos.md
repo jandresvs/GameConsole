@@ -160,6 +160,12 @@ Como `Race` no depende del navegador, las pruebas corren carreras enteras en
 milisegundos con un piloto automático (`testing/Autopilot.ts`) y revisan que
 los eventos salgan como los espera el analizador de Scala.
 
+`combat` sigue la misma forma: `CombatMatch` tiene las reglas, `CombatRenderer`
+dibuja y `CombatGame` extiende `Game` y además escucha el ratón sobre
+`this.canvas`. Para el ratón hay que convertir las coordenadas de pantalla a
+las del canvas, porque en pantalla puede verse más chico (ver
+`listenToPointer` en `CombatGame.ts`).
+
 Para números al azar, usar `Random` (`src/games/core/Random.ts`) con semilla
 en vez de `Math.random()`: así una partida se puede repetir igual en una prueba.
 

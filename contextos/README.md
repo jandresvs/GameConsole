@@ -29,9 +29,11 @@ Hecho:
   con cola, envío por lotes, reintentos y envío al cerrar la pestaña.
 - **`racing`** (A4): el usuario contra tres bots, a tres vueltas. Sirve de
   ejemplo completo de cómo se escribe un juego (ver `07-contrato-juegos.md`).
+- **`combat`** (A5): todos contra todos en una arena, el usuario contra tres
+  bots, hasta 8 eliminaciones.
 
-Sigue: `combat` (A5, Andrés), y el servicio Prolog con A\* y `chase` (J1 y J2,
-Jean).
+Sigue: el servicio Prolog con A\* y `chase` (J1 y J2, Jean); instancias por
+juego en Go y CI/CD (A6 y A7, Andrés).
 
 ## Reglas de esta carpeta
 

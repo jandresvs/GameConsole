@@ -7,8 +7,8 @@ en paralelo, una CPU que decide con **Prolog**, y estadísticas en vivo que vien
 de [GameStats](https://github.com/ssanscarlos-rgb/GameStats), el proyecto 1.
 
 > **Estado: en construcción.** La consola abre partidas (varias a la vez o en
-> otra pestaña) y envía sus eventos a GameStats. De los tres juegos, `racing`
-> ya se puede jugar; faltan `combat`, `chase` y el panel. Los acuerdos del proyecto,
+> otra pestaña) y envía sus eventos a GameStats. De los tres juegos, `racing` y
+> `combat` ya se pueden jugar; faltan `chase` y el panel. Los acuerdos del proyecto,
 > el reparto y lo que sigue están en [`contextos/`](contextos/README.md).
 
 ```

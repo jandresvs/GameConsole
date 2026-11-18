@@ -74,6 +74,11 @@ Comunes a los tres: `MATCH_STARTED`, `PLAYER_JOINED` (uno por jugador) y
 Con eso Scala calcula K/D, precisión, daño promedio y los patrones
 `KILL_STREAK` y `COMEBACK`.
 
+En GameConsole: arena `La Plaza`, el usuario más `bot-1` (rifle), `bot-2`
+(escopeta) y `bot-3` (pistola), todos contra todos. `MATCH_STARTED` lleva
+además `arena` y `killsToWin` (8); Scala no los usa, pero no molestan. Armas:
+`rifle` (34 de daño), `pistola` (25) y `escopeta` (50).
+
 ### `racing`
 
 | `type` | `playerId` | `data` |

@@ -26,6 +26,19 @@
 | Fin de la carrera | Cuando todos terminan, o 30 s después del primero; quien no llegó queda sin terminar | Una carrera no puede quedar abierta si el usuario se pierde |
 | Aleatoriedad | `Random` con semilla en vez de `Math.random()` | Con la misma semilla la carrera se repite igual, y así se puede probar |
 
+### Decisiones de `combat`
+
+| Tema | Decisión | Por qué |
+|---|---|---|
+| Modo | Todos contra todos: el usuario y tres bots | Los bots también se eliminan entre sí, así hay estadísticas para todos |
+| Fin | Gana el primero en llegar a 8 eliminaciones; si se acaban los 3:00, el líder; empate = sin ganador | Con 5 la partida duraba ~30 s; con 8 dura entre 40 y 80 s y aparecen rachas y remontadas |
+| Disparos | Cada disparo es un proyectil que impacta a lo sumo a uno | Scala calcula la precisión como impactos / disparos: así nunca pasa de 100 % |
+| Escopeta | Un solo proyectil de 50 de daño y corto alcance, no perdigones | Varios perdigones por disparo darían más impactos que disparos |
+| `amount` | El daño que realmente quitó (nunca más que la vida que quedaba) | En cada vida, los impactos suman exactamente 100 |
+| Reaparición | A los 2 s, en el punto más alejado de los vivos, con 1 s de protección | Evita que eliminen a alguien apenas reaparece |
+| Rivales | Bots con reglas: el enemigo visible más cercano, error de puntería, distancia ideal según el arma | Predecibles y sin Prolog, igual que en `racing` |
+| Controles | WASD o flechas para moverse; el ratón apunta y el clic dispara | Es lo esperable en un juego de disparos visto desde arriba |
+
 ### Alternativa descartada para `chase`
 
 Que La Mala huya controlada por Prolog. Se siente más como un rival, pero hay
