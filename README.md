@@ -6,9 +6,9 @@ Tres juegos orientados a objetos (**combat**, **racing** y **chase**), partidas
 en paralelo, una CPU que decide con **Prolog**, y estadísticas en vivo que vienen
 de [GameStats](https://github.com/ssanscarlos-rgb/GameStats), el proyecto 1.
 
-> **Estado: en construcción.** La consola ya abre partidas (varias a la vez o
-> en otra pestaña) y envía sus eventos a GameStats, pero todavía no están los
-> tres juegos ni el panel. Los acuerdos del proyecto,
+> **Estado: en construcción.** La consola abre partidas (varias a la vez o en
+> otra pestaña) y envía sus eventos a GameStats. De los tres juegos, `racing`
+> ya se puede jugar; faltan `combat`, `chase` y el panel. Los acuerdos del proyecto,
 > el reparto y lo que sigue están en [`contextos/`](contextos/README.md).
 
 ```

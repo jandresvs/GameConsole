@@ -16,7 +16,7 @@ Leer en este orden:
 | [`06-reparto.md`](06-reparto.md) | Tareas de cada uno, criterio de "listo" y calendario |
 | [`07-contrato-juegos.md`](07-contrato-juegos.md) | Cómo escribir un juego: la clase base `Game` y sus reglas |
 
-## Estado actual (16 de noviembre)
+## Estado actual (18 de noviembre)
 
 Hecho:
 
@@ -25,12 +25,13 @@ Hecho:
 - El **contrato entre la consola y los juegos** (A2): la clase base `Game`, la
   consola abre varias partidas a la vez o en otra pestaña, y hay un juego de
   ejemplo solo para desarrollo.
-- La **capa de eventos** (A3): los eventos de los juegos ya llegan a GameStats,
+- La **capa de eventos** (A3): los eventos de los juegos llegan a GameStats,
   con cola, envío por lotes, reintentos y envío al cerrar la pestaña.
+- **`racing`** (A4): el usuario contra tres bots, a tres vueltas. Sirve de
+  ejemplo completo de cómo se escribe un juego (ver `07-contrato-juegos.md`).
 
-Con esto ya se puede escribir un juego completo y ver sus estadísticas en
-GameStats. Sigue: `racing` y `combat` (A4 y A5, Andrés), y el servicio Prolog
-con A\* y `chase` (J1 y J2, Jean).
+Sigue: `combat` (A5, Andrés), y el servicio Prolog con A\* y `chase` (J1 y J2,
+Jean).
 
 ## Reglas de esta carpeta
 

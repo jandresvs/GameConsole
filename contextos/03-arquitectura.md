@@ -60,9 +60,10 @@ GameConsole/
 │       ├── config.ts           rutas de la API
 │       ├── console/            la pantalla principal: catálogo, partidas abiertas, jugador
 │       ├── games/
-│       │   ├── core/           clase base Game, GameDefinition y teclado
+│       │   ├── core/           clase base Game, GameDefinition, teclado y Random
 │       │   ├── example/        juego de ejemplo (solo desarrollo)
-│       │   └── combat/, racing/, chase/   (por crear) una carpeta por juego
+│       │   ├── racing/         racing: pista, autos, reglas de carrera y dibujo
+│       │   └── combat/, chase/ (por crear) una carpeta por juego
 │       ├── events/             eventos por partida (MatchEvents) y su envío a GameStats (HttpEventSink)
 │       ├── services/           estado de los servicios
 │       └── dashboard/          (por crear) panel de estadísticas

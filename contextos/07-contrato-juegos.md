@@ -1,8 +1,10 @@
 # 07 · Contrato entre la consola y los juegos
 
 Cómo se escribe un juego para que la consola lo pueda ofrecer, abrir varias
-veces a la vez y enviar sus eventos. El ejemplo completo y funcionando está en
-`console-web/src/games/example/ExampleGame.ts`.
+veces a la vez y enviar sus eventos. Hay dos ejemplos funcionando:
+
+- `console-web/src/games/example/ExampleGame.ts`: el mínimo, en un archivo.
+- `console-web/src/games/racing/`: un juego completo de la entrega (ver abajo).
 
 ## La idea
 
@@ -140,6 +142,26 @@ otra pestaña**. Cada juego va en su carpeta: `src/games/racing/`,
 - `npm test` corre las pruebas automáticas.
 - En la versión de Docker el ejemplo no aparece, porque la entrega lleva
   exactamente tres juegos. Para verlo ahí: http://localhost:3000/?demo
+
+## Racing como modelo para los demás juegos
+
+`racing` separa las reglas del dibujo, y conviene copiar esa forma:
+
+| Archivo | Qué hace | Toca el navegador |
+|---|---|---|
+| `Track.ts`, `tracks.ts` | La pista: geometría, curvatura, proyección de un punto | No |
+| `Car.ts`, `PlayerCar.ts`, `BotCar.ts` | Los autos: uno con física y teclado, los bots con reglas | No |
+| `LapTracker.ts` | Cuenta vueltas y mide sus tiempos | No |
+| `Race.ts` | Las reglas de la carrera; avisa choques, vueltas y el final | No |
+| `RaceRenderer.ts` | Dibuja la carrera en el canvas | Sí |
+| `RacingGame.ts` | Extiende `Game`: lee el teclado, llama a `Race` y convierte sus avisos en eventos | Sí |
+
+Como `Race` no depende del navegador, las pruebas corren carreras enteras en
+milisegundos con un piloto automático (`testing/Autopilot.ts`) y revisan que
+los eventos salgan como los espera el analizador de Scala.
+
+Para números al azar, usar `Random` (`src/games/core/Random.ts`) con semilla
+en vez de `Math.random()`: así una partida se puede repetir igual en una prueba.
 
 ## Cómo llegan los eventos a GameStats
 

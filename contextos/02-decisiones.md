@@ -16,6 +16,16 @@
 | Identificadores de eventos | `matchId` = `<gameId>-<uuid>`; `eventId` = `<matchId>-<número>` | El mismo formato de `eventId` que usa el simulador de GameStats: legible y único. |
 | Identificadores en el código | En inglés; comentarios, textos y documentación en español | Igual que en GameStats. |
 
+### Decisiones de `racing`
+
+| Tema | Decisión | Por qué |
+|---|---|---|
+| Rivales | Tres bots que avanzan sobre la línea central, cada uno con su velocidad máxima y su agarre en curva | Son predecibles y no se salen de la pista. No hace falta Prolog: el juego contra la CPU con Prolog es `chase` |
+| Choques entre autos | No hay: los autos se atraviesan | Simplifica mucho y evita que un bot bloquee al usuario |
+| Choque con el muro | A más de 70 px/s el auto se detiene entre 0,9 y 2,4 s; más lento, solo raspa | Castiga entrar rápido a una curva sin frustrar al rozar el borde |
+| Fin de la carrera | Cuando todos terminan, o 30 s después del primero; quien no llegó queda sin terminar | Una carrera no puede quedar abierta si el usuario se pierde |
+| Aleatoriedad | `Random` con semilla en vez de `Math.random()` | Con la misma semilla la carrera se repite igual, y así se puede probar |
+
 ### Alternativa descartada para `chase`
 
 Que La Mala huya controlada por Prolog. Se siente más como un rival, pero hay

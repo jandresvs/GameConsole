@@ -1,5 +1,6 @@
 import type { GameDefinition } from "../games/core/GameDefinition";
 import { ExampleGame } from "../games/example/ExampleGame";
+import { RacingGame } from "../games/racing/RacingGame";
 
 /**
  * Los juegos que la consola ofrece. Para agregar uno: importar su definición
@@ -13,11 +14,7 @@ export class GameCatalog {
       title: "Combat",
       description: "Arena vista desde arriba: disparos, daño y eliminaciones contra bots.",
     },
-    {
-      id: "racing",
-      title: "Racing",
-      description: "Carrera por vueltas contra pilotos automáticos, con choques que cuestan tiempo.",
-    },
+    RacingGame.definition,
     {
       id: "chase",
       title: "Chase",

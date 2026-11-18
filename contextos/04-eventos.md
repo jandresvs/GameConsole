@@ -86,6 +86,10 @@ Con eso Scala calcula K/D, precisión, daño promedio y los patrones
 Las posiciones no se envían: Scala las reconstruye con los tiempos. Patrones:
 `FASTEST_LAP`, `COMEBACK`, `CLEAN_RACE`.
 
+En GameConsole: pista `Circuito Arenal`, 3 vueltas, el usuario más `bot-1`,
+`bot-2` y `bot-3`. Quien no completa las vueltas antes del cierre no manda más
+`LAP_COMPLETED`; Scala lo ordena por vueltas completadas y después por tiempo.
+
 ### `chase`
 
 | `type` | `playerId` | `data` |

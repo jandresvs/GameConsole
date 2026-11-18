@@ -12,7 +12,7 @@ Cada tarea tiene un criterio de "listo" para saber cuándo soltarla.
 | A1 | **Esqueleto**: repo, proyecto TypeScript, nginx, compose con GameStats, página de la consola | Con `docker compose up`, un evento enviado desde el navegador aparece en `/status` del ingest | Hecho (falta probarlo con Docker; ver el README) |
 | A2 | **Contrato entre consola y juegos**: clase base `Game` (ciclo de vida, `matchId`, actualizar, dibujar) e interfaz `EventSender` | Jean puede escribir `ChaseGame` sin preguntar; queda explicado en esta carpeta | Hecho: ver `07-contrato-juegos.md` |
 | A3 | **Capa de eventos**: arma los eventos, los encola, los envía por lotes en segundo plano y reintenta con el mismo `eventId` | Dos partidas simultáneas envían eventos y `/rejected` queda vacío | Hecho: `HttpEventSink` |
-| A4 | **Juego `racing`**: el usuario contra dos o tres pilotos automáticos | Al terminar una carrera, Scala muestra vueltas, choques y patrones | Pendiente |
+| A4 | **Juego `racing`**: el usuario contra dos o tres pilotos automáticos | Al terminar una carrera, Scala muestra vueltas, choques y patrones | Hecho; falta verlo con Scala levantado |
 | A5 | **Juego `combat`**: el usuario contra bots en una arena | Scala calcula K/D y precisión de la partida | Pendiente |
 | A6 | **Instancias por juego en Go**: partidas abiertas y entregadas por `gameId` en `/status` | Abrir una partida sube el contador de su juego antes de que termine | Pendiente |
 | A7 | **CI/CD y deployment**: prueba de humo con el compose, publicación de imágenes por release, instrucciones | Un release deja las imágenes en Packages y el README explica cómo desplegar | CI básico hecho |
