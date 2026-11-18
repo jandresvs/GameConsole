@@ -22,7 +22,7 @@ Cada tarea tiene un criterio de "listo" para saber cuándo soltarla.
 | # | Tarea | Listo cuando | Estado |
 |---|---|---|---|
 | J1 | **Servicio Prolog**: A\* con el contrato de `05-prolog.md` | Responde bien con `curl` a un tablero con ruta y a uno sin ruta | Hecho (falta probarlo con Docker) |
-| J2 | **Juego `chase`**: tablero, La Mala fija, el usuario contra la CPU guiada por Prolog | Una partida completa aparece en Scala con estadísticas de los dos jugadores | Juego hecho (ver `07-chase.md`) sobre `Game` y `EventSender` provisionales; falta verlo en Scala y alinear con A2 y A3 |
+| J2 | **Juego `chase`**: carrera en tiempo real hacia una salida en un borde, contra la IA (Prolog, con dificultad) o humano contra humano | Una partida completa aparece en Scala con estadísticas de los dos jugadores | Juego hecho (ver `07-chase.md`) sobre `Game` y `EventSender` provisionales; falta verlo en Scala y alinear con A2 y A3 |
 | J3 | **Resumen por juego en Scala**: `GET /results/games` con datos por juego y totales | El panel muestra "por juego" y "general" sin sumar nada por su cuenta | Escrito en `GameStats` (`/results/games`, contrato 3.5 y 4.3); falta compilarlo y correr `sbt test` |
 | J4 | **Panel de estadísticas** dentro de la consola, con consulta periódica | Los números cambian mientras hay partidas abiertas, sin recargar | Hecho en `console-web/src/dashboard/` (consulta cada 2 s); falta verlo con partidas reales |
 

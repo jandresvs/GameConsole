@@ -9,17 +9,16 @@
 | Dibujo | Canvas 2D, sin framework | No hay tiempo para aprender nada nuevo. |
 | Servidor de la consola | **nginx**: entrega la página y reenvía `/api/...` | GameStats no tiene CORS; con el proxy el navegador habla con un solo origen. No hay código de servidor propio. |
 | Prolog | **SWI-Prolog** en su propio contenedor, con un endpoint HTTP | El enunciado pide contenerizar el intérprete. Sin estado: recibe el tablero y devuelve la jugada. |
-| Mecánica de `chase` | **Carrera contra la CPU**: el usuario y una segunda Buena controlada por Prolog compiten por alcanzar primero a La Mala | Cumple "usuario contra computadora" y, según el código del analizador de Scala, funciona sin cambiarlo porque ya calcula por jugador. |
+| Mecánica de `chase` | **Carrera en tiempo real hacia una salida en un borde**, en un mismo mapa: contra la IA (Prolog, con dificultad = velocidad de la IA) o humano contra humano en el mismo teclado. Las personas tienen 0,5 s de espera entre movimientos | Cumple "usuario contra computadora" con Prolog en cada paso de la IA, y el analizador de Scala ya calcula por jugador. Ver `07-chase.md` |
 | Repositorio | Repo nuevo `GameConsole`; GameStats se usa como **imágenes publicadas** | Mantiene a GameStats como plataforma externa. |
 | Deployment | Imágenes en ghcr.io por release, más `docker compose` | Lo mismo que se hizo en GameStats. |
 | Identificadores en el código | En inglés; comentarios, textos y documentación en español | Igual que en GameStats. |
 
-### Alternativa descartada para `chase`
+### Cambio de diseño de `chase` (18 de noviembre)
 
-Que La Mala huya controlada por Prolog. Se siente más como un rival, pero hay
-que inventar una regla para que sea alcanzable, y la estadística de eficiencia
-(pasos óptimos contra pasos usados) pierde sentido cuando el objetivo se mueve.
-Queda como mejora solo si sobra tiempo.
+La primera versión era una carrera por turnos hacia "La Mala" (una celda fija en cualquier parte). Se cambió a
+tiempo real con una salida en el borde, modo contra la IA con dificultad y modo humano contra humano. Se descartó
+también que La Mala huyera (hay que inventar una regla para que sea alcanzable y la eficiencia pierde sentido).
 
 ## Lo que encontramos en GameStats y cómo nos afecta
 

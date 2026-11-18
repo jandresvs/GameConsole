@@ -1,5 +1,5 @@
 import { BasicEventSender } from "../events/BasicEventSender";
-import type { Game } from "../games/Game";
+import type { Game, GameSettingsForm } from "../games/Game";
 import { el } from "./dom";
 import type { GameEntry } from "./GameCatalog";
 import { PlayerProfile } from "./PlayerProfile";
@@ -13,18 +13,22 @@ export class StandalonePage {
   private readonly sender = new BasicEventSender();
   private readonly profile = new PlayerProfile();
   private readonly body = el("div", "match-body");
+  private readonly form: GameSettingsForm | undefined;
   private current: Game | null = null;
 
   constructor(
     private readonly root: HTMLElement,
     private readonly entry: GameEntry,
-  ) {}
+  ) {
+    this.form = entry.settingsForm?.();
+  }
 
   mount(): void {
     const again = el("button", "", "Nueva partida");
     again.addEventListener("click", () => this.newMatch());
     this.root.replaceChildren(
       el("header", "top", el("h1", "", this.entry.title), el("p", "muted", `Jugador: ${this.profile.name}`)),
+      ...(this.form ? [this.form.element] : []),
       this.body,
       el("div", "actions", again),
     );
@@ -37,7 +41,7 @@ export class StandalonePage {
 
   private newMatch(): void {
     this.current?.dispose();
-    const game = this.entry.create?.({ playerId: this.profile.name, sender: this.sender });
+    const game = this.entry.create?.({ playerId: this.profile.name, sender: this.sender }, this.form);
     if (!game) return;
     this.current = game;
     game.mount(this.body);

@@ -1,12 +1,13 @@
 import type { Board } from "./Board.ts";
 import type { Direction } from "./Direction.ts";
+import { HUMAN_COOLDOWN_MS } from "./Pace.ts";
 import { Position } from "./Position.ts";
 import type { RouteFinder } from "./RouteFinder.ts";
 
 export type RacerKind = "human" | "cpu";
 
 /**
- * Quien corre hacia La Mala. Guarda su propia posición, vidas y recorrido; el
+ * Quien corre hacia la salida. Guarda su propia posición, vidas y recorrido; el
  * resto del juego lo consulta y le pide moverse, no toca sus campos.
  */
 export abstract class Racer {
@@ -30,6 +31,10 @@ export abstract class Racer {
   }
   get lives(): number {
     return this.livesLeft;
+  }
+  /** Sin vidas: queda fuera de la carrera. */
+  get isEliminated(): boolean {
+    return this.livesLeft <= 0;
   }
   /** Celdas recorridas con éxito (los choques no cuentan). */
   get steps(): number {
@@ -57,15 +62,46 @@ export abstract class Racer {
   }
 }
 
-/** El usuario: se mueve con lo que pulsa en el teclado o en los botones. */
+/**
+ * Una persona. No puede moverse más rápido que una vez cada `cooldownMs`: las
+ * teclas que llegan antes se ignoran (no se acumulan).
+ */
 export class HumanRacer extends Racer {
+  readonly cooldownMs: number;
+  private lastActionAt = Number.NEGATIVE_INFINITY;
+
+  constructor(id: string, start: Position, lives: number, cooldownMs = HUMAN_COOLDOWN_MS) {
+    super(id, start, lives);
+    this.cooldownMs = cooldownMs;
+  }
+
   get kind(): RacerKind {
     return "human";
   }
+
+  isReady(now: number): boolean {
+    return now - this.lastActionAt >= this.cooldownMs;
+  }
+
+  markAction(now: number): void {
+    this.lastActionAt = now;
+  }
+
+  /** 0 = acaba de moverse, 1 = lista para moverse. */
+  readiness(now: number): number {
+    return Math.min(1, Math.max(0, (now - this.lastActionAt) / this.cooldownMs));
+  }
 }
 
-/** La CPU: su siguiente paso lo decide Prolog, siempre. */
+/** La IA: mueve sola cada `intervalMs` y su siguiente paso lo decide Prolog, siempre. */
 export class CpuRacer extends Racer {
+  readonly intervalMs: number;
+
+  constructor(id: string, start: Position, lives: number, intervalMs: number) {
+    super(id, start, lives);
+    this.intervalMs = intervalMs;
+  }
+
   get kind(): RacerKind {
     return "cpu";
   }

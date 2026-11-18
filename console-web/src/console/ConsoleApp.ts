@@ -1,6 +1,6 @@
 import { API } from "../config";
 import { BasicEventSender } from "../events/BasicEventSender";
-import type { Game } from "../games/Game";
+import type { Game, GameSettingsForm } from "../games/Game";
 import { ConnectionTest } from "../services/ConnectionTest";
 import { ServiceMonitor, type ServiceInfo, type ServiceState } from "../services/ServiceMonitor";
 import { el } from "./dom";
@@ -102,7 +102,8 @@ export class ConsoleApp {
     const tab = el("button", "secondary", "Abrir en otra pestaña");
     // Se habilitan cuando el juego esté implementado (game.status === "listo").
     play.disabled = tab.disabled = game.status !== "listo";
-    play.addEventListener("click", () => this.startMatch(game));
+    const form = game.settingsForm?.();
+    play.addEventListener("click", () => this.startMatch(game, form));
     tab.addEventListener("click", () => window.open(`${location.pathname}?game=${game.id}`, "_blank"));
 
     return el(
@@ -111,6 +112,7 @@ export class ConsoleApp {
       el("div", "card-head", el("h3", "", game.title), el("code", "", game.id)),
       el("p", "muted", game.description),
       el("p", "status", game.status === "listo" ? "Listo" : "En desarrollo"),
+      ...(form ? [form.element] : []),
       el("div", "actions", play, tab),
     );
   }
@@ -120,8 +122,8 @@ export class ConsoleApp {
   }
 
   /** Abre una partida nueva debajo de las demás; cada una tiene su propio matchId. */
-  private startMatch(entry: GameEntry): void {
-    const game = entry.create?.({ playerId: this.profile.name, sender: this.sender });
+  private startMatch(entry: GameEntry, form?: GameSettingsForm): void {
+    const game = entry.create?.({ playerId: this.profile.name, sender: this.sender }, form);
     if (!game) return;
     this.running.add(game);
 

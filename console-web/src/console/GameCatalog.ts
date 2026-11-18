@@ -1,6 +1,7 @@
 import type { EventSender } from "../events/types";
-import type { Game } from "../games/Game";
+import type { Game, GameSettingsForm } from "../games/Game";
 import { ChaseGame } from "../games/chase/ChaseGame";
+import { ChaseSettingsForm } from "../games/chase/ChaseSettingsForm";
 
 export type GameStatus = "pendiente" | "listo";
 
@@ -17,7 +18,9 @@ export interface GameEntry {
   readonly description: string;
   readonly status: GameStatus;
   /** Crea una partida nueva. Solo los juegos con status "listo" la traen. */
-  readonly create?: (context: GameContext) => Game;
+  readonly create?: (context: GameContext, settings?: GameSettingsForm) => Game;
+  /** Controles de configuración que se muestran en la tarjeta (modo, dificultad...). */
+  readonly settingsForm?: () => GameSettingsForm;
 }
 
 /**
@@ -41,9 +44,15 @@ export class GameCatalog {
     {
       id: "chase",
       title: "Chase",
-      description: "La Buena vs La Mala: carrera contra una CPU que decide su ruta con Prolog (A*).",
+      description: "Carrera en tiempo real hacia la salida del mapa: contra una IA que decide con Prolog (con dificultad) o humano contra humano.",
       status: "listo",
-      create: (context) => new ChaseGame({ playerId: context.playerId, sender: context.sender }),
+      settingsForm: () => new ChaseSettingsForm(),
+      create: (context, form) =>
+        new ChaseGame({
+          playerId: context.playerId,
+          sender: context.sender,
+          settings: form instanceof ChaseSettingsForm ? form.read() : undefined,
+        }),
     },
   ];
 

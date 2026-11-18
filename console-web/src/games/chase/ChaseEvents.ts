@@ -3,8 +3,19 @@ import type { EventSender } from "../../events/types.ts";
 import { newId } from "../../events/ids.ts";
 import type { Board } from "./Board.ts";
 import type { Direction } from "./Direction.ts";
+import type { Difficulty } from "./Pace.ts";
 import type { Position } from "./Position.ts";
 import type { Route } from "./RouteFinder.ts";
+
+export interface MatchInfo {
+  board: Board;
+  lives: number;
+  mode: "vs-cpu" | "vs-human";
+  humanCooldownMs: number;
+  /** Solo en partidas contra la IA. */
+  difficulty?: Difficulty;
+  cpuIntervalMs?: number;
+}
 
 /**
  * Traduce lo que pasa en una partida de chase a eventos de GameStats
@@ -20,12 +31,17 @@ export class ChaseEvents {
     this.matchId = matchId;
   }
 
-  matchStarted(board: Board, lives: number): void {
+  matchStarted(info: MatchInfo): void {
+    const { board } = info;
     this.emit("MATCH_STARTED", undefined, {
       rows: board.rows,
       cols: board.cols,
       obstaclePct: board.obstaclePct,
-      lives,
+      lives: info.lives,
+      mode: info.mode,
+      exit: board.exit.toJSON(),
+      humanCooldownMs: info.humanCooldownMs,
+      ...(info.difficulty === undefined ? {} : { difficulty: info.difficulty, cpuIntervalMs: info.cpuIntervalMs }),
     });
   }
 

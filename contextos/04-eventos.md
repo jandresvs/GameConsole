@@ -75,23 +75,23 @@ Las posiciones no se envían: Scala las reconstruye con los tiempos. Patrones:
 
 ### `chase`
 
+Carrera en tiempo real hacia una **salida** en un borde del mapa (ver `07-chase.md`). Pueden ser una persona y la
+IA (`cpu`), o dos personas. Cada jugador emite su propio `ROUTE_COMPUTED`, sus `PLAYER_MOVED` y, si llega,
+su `TARGET_REACHED`.
+
 | `type` | `playerId` | `data` |
 |---|---|---|
-| `MATCH_STARTED` | – | `rows`, `cols`, `obstaclePct`, `lives` |
-| `ROUTE_COMPUTED` | jugador | `found`, `start` y `goal` (`{row, col}`), y si hay ruta: `optimalSteps`, `routeTurns` |
+| `MATCH_STARTED` | – | `rows`, `cols`, `obstaclePct`, `lives`, y propios del juego: `mode` (`vs-cpu` o `vs-human`), `exit` (`{row, col}`), `humanCooldownMs`, y solo contra la IA `difficulty` y `cpuIntervalMs` |
+| `ROUTE_COMPUTED` | jugador | `found`, `start` y `goal` (`{row, col}`, `goal` es la salida), y si hay ruta: `optimalSteps`, `routeTurns` |
 | `PLAYER_MOVED` | jugador | `row`, `col` (celda de llegada), `direction`, `turn` (si cambió de dirección) |
-| `OBSTACLE_HIT` | jugador | `row`, `col`, `livesLeft` |
+| `OBSTACLE_HIT` | jugador | `row`, `col` (el obstáculo), `livesLeft` |
 | `TARGET_REACHED` | jugador | `steps`, `turns` |
-| `MATCH_FINISHED` | – | `winnerId` = quien alcanzó primero a La Mala |
+| `MATCH_FINISHED` | – | `winnerId` = quien llegó primero a la salida; sin `winnerId` si nadie llegó |
 
-Coordenadas `(row, col)` desde 0. Direcciones: `arriba`, `abajo`, `izquierda`, `derecha`.
+Coordenadas `(row, col)` desde 0. Direcciones: `arriba`, `abajo`, `izquierda`, `derecha`. Los pasos y giros de
+`ROUTE_COMPUTED` (óptimos desde el inicio) los calcula Prolog; como todos empiezan en la misma celda, son iguales
+para todos los jugadores. Los choques no cuentan como pasos.
 
-**Cambio respecto al contrato actual:** el contrato dice "un solo jugador por
-partida". Con la carrera contra la CPU habrá dos: el usuario y `cpu`. Cada uno
-emite su propio `ROUTE_COMPUTED`, sus `PLAYER_MOVED` y, si llega,
-su `TARGET_REACHED`. Leyendo `ChaseAnalyzer.scala`, todo se calcula por
-`playerId`, así que debería funcionar sin tocarlo. **Falta comprobarlo con una
-partida real** y actualizar la sección 2.4 de `CONTRACT.md` en la v1.1.
-
-Los valores de `ROUTE_COMPUTED` (pasos óptimos y giros) salen del servicio
-Prolog, tanto para la CPU como para el usuario.
+**Cambio respecto al contrato actual de GameStats:** el contrato dice "un solo jugador por partida"; ahora hay
+dos. Leyendo `ChaseAnalyzer.scala`, todo se calcula por `playerId`, así que debería funcionar sin tocarlo.
+**Falta comprobarlo con una partida real** y actualizar la sección 2.4 de `CONTRACT.md` en la v1.1.

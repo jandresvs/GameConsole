@@ -54,7 +54,7 @@ export class PrologRouteFinder implements RouteFinder {
       cols: board.cols,
       obstacles: board.obstacleList(),
       from,
-      goal: board.target,
+      goal: board.exit,
     });
 
     for (let attempt = 1; ; attempt++) {

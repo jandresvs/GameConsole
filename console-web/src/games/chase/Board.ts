@@ -1,34 +1,42 @@
 import { Position } from "./Position.ts";
 
-/** Tablero ya generado: dónde empieza cada jugador. */
-export interface Layout {
-  readonly board: Board;
-  readonly userStart: Position;
-  readonly cpuStart: Position;
-}
-
 /**
- * El tablero de chase: tamaño, obstáculos y La Mala (la meta, que no se mueve).
+ * El mapa de chase: tamaño, obstáculos, la celda de salida (siempre en un borde)
+ * y la celda donde empiezan todos los jugadores. Todos juegan en el MISMO mapa.
  * Encapsula los obstáculos: desde fuera solo se pregunta, no se modifican.
  */
 export class Board {
   readonly rows: number;
   readonly cols: number;
-  readonly target: Position;
+  readonly start: Position;
+  readonly exit: Position;
   /** Porcentaje con el que se generó (lo pide MATCH_STARTED). */
   readonly obstaclePct: number;
   private readonly obstacles: ReadonlyMap<string, Position>;
 
-  constructor(rows: number, cols: number, obstacles: readonly Position[], target: Position, obstaclePct = 0) {
+  constructor(
+    rows: number,
+    cols: number,
+    obstacles: readonly Position[],
+    start: Position,
+    exit: Position,
+    obstaclePct = 0,
+  ) {
     this.rows = rows;
     this.cols = cols;
-    this.target = target;
+    this.start = start;
+    this.exit = exit;
     this.obstaclePct = obstaclePct;
     this.obstacles = new Map(obstacles.map((p) => [p.key(), p]));
+    if (!this.isBorder(exit)) throw new RangeError("La salida debe estar en un borde del mapa");
   }
 
   inBounds(p: Position): boolean {
     return p.row >= 0 && p.row < this.rows && p.col >= 0 && p.col < this.cols;
+  }
+
+  isBorder(p: Position): boolean {
+    return this.inBounds(p) && (p.row === 0 || p.col === 0 || p.row === this.rows - 1 || p.col === this.cols - 1);
   }
 
   isObstacle(p: Position): boolean {
@@ -40,25 +48,40 @@ export class Board {
   }
 
   /**
-   * Tablero al azar: La Mala y las dos Buenas en celdas distintas y los obstáculos
-   * en otras. `random` devuelve un número en [0, 1); se inyecta para poder probar.
+   * Mapa al azar. La salida cae en una celda del borde; el inicio, en una celda a
+   * distancia Manhattan >= `minDistance` de la salida (si no hay ninguna, en la más
+   * lejana). Los obstáculos van en otras celdas. No garantiza que exista ruta: eso lo
+   * comprueba Prolog (ver MapBuilder). `random` devuelve [0, 1); se inyecta para probar.
    */
-  static generate(rows: number, cols: number, obstaclePct: number, random: () => number = Math.random): Layout {
+  static generate(
+    rows: number,
+    cols: number,
+    obstaclePct: number,
+    random: () => number = Math.random,
+    minDistance = 0,
+  ): Board {
     if (!Number.isInteger(rows) || !Number.isInteger(cols) || rows < 2 || cols < 2) {
-      throw new RangeError("El tablero necesita al menos 2 filas y 2 columnas");
+      throw new RangeError("El mapa necesita al menos 2 filas y 2 columnas");
     }
     if (!(obstaclePct >= 0 && obstaclePct <= 60)) {
       throw new RangeError("El porcentaje de obstáculos debe estar entre 0 y 60");
     }
-    const cells: Position[] = [];
-    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) cells.push(new Position(r, c));
-    for (let i = cells.length - 1; i > 0; i--) {
+    const pick = <T>(items: T[]): T => items[Math.floor(random() * items.length)]!;
+    const all: Position[] = [];
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) all.push(new Position(r, c));
+
+    const exit = pick(all.filter((p) => p.row === 0 || p.col === 0 || p.row === rows - 1 || p.col === cols - 1));
+    const rest = all.filter((p) => !p.equals(exit));
+    for (let i = rest.length - 1; i > 0; i--) {
       const j = Math.floor(random() * (i + 1));
-      [cells[i], cells[j]] = [cells[j]!, cells[i]!];
+      [rest[i], rest[j]] = [rest[j]!, rest[i]!];
     }
-    const [target, userStart, cpuStart] = [cells[0]!, cells[1]!, cells[2]!];
-    const count = Math.min(Math.floor((rows * cols * obstaclePct) / 100), cells.length - 3);
-    const board = new Board(rows, cols, cells.slice(3, 3 + count), target, obstaclePct);
-    return { board, userStart, cpuStart };
+    const distance = (p: Position) => Math.abs(p.row - exit.row) + Math.abs(p.col - exit.col);
+    const far = rest.filter((p) => distance(p) >= minDistance);
+    const start = far.length > 0 ? far[0]! : rest.reduce((best, p) => (distance(p) > distance(best) ? p : best));
+
+    const free = rest.filter((p) => !p.equals(start));
+    const count = Math.min(Math.floor((rows * cols * obstaclePct) / 100), free.length);
+    return new Board(rows, cols, free.slice(0, count), start, exit, obstaclePct);
   }
 }

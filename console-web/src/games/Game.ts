@@ -3,6 +3,11 @@
  * El contrato definitivo es la tarea A2 (contextos/06-reparto.md); si cambia,
  * se ajusta aquí y en los juegos.
  */
+/** Controles que un juego muestra antes de empezar (modo, dificultad...). */
+export interface GameSettingsForm {
+  readonly element: HTMLElement;
+}
+
 export abstract class Game {
   /** gameId del contrato de GameStats: combat, racing o chase. */
   readonly gameId: string;
