@@ -14,6 +14,7 @@ Leer en este orden:
 | [`04-eventos.md`](04-eventos.md) | Reglas para emitir eventos y qué eventos emite cada juego |
 | [`05-prolog.md`](05-prolog.md) | Contrato propuesto del servicio Prolog |
 | [`06-reparto.md`](06-reparto.md) | Tareas de cada uno, criterio de "listo" y calendario |
+| [`07-chase.md`](07-chase.md) | Reglas y clases del juego `chase` |
 
 ## Estado actual (16 de noviembre)
 

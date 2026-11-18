@@ -1,8 +1,12 @@
 import { API } from "../config";
+import { BasicEventSender } from "../events/BasicEventSender";
+import type { Game } from "../games/Game";
 import { ConnectionTest } from "../services/ConnectionTest";
 import { ServiceMonitor, type ServiceInfo, type ServiceState } from "../services/ServiceMonitor";
 import { el } from "./dom";
+import { Dashboard } from "../dashboard/Dashboard";
 import { GameCatalog, type GameEntry } from "./GameCatalog";
+import { PlayerProfile } from "./PlayerProfile";
 
 const SERVICES: readonly ServiceInfo[] = [
   { id: "ingest", name: "GameStats · ingest (Go)", healthUrl: `${API.ingest}/health` },
@@ -26,6 +30,11 @@ export class ConsoleApp {
   private readonly connectionTest = new ConnectionTest();
   private readonly badges = new Map<string, HTMLElement>();
   private readonly monitor = new ServiceMonitor(SERVICES, (service, state) => this.showState(service, state));
+  private readonly profile = new PlayerProfile();
+  private readonly sender = new BasicEventSender();
+  private readonly running = new Set<Game>();
+  private readonly matchesEl = el("div", "matches");
+  private readonly dashboard = new Dashboard(this.catalog.all().map((game) => game.id));
 
   constructor(private readonly root: HTMLElement) {}
 
@@ -34,18 +43,34 @@ export class ConsoleApp {
       this.header(),
       this.servicesSection(),
       this.gamesSection(),
+      this.matchesSection(),
       this.dashboardSection(),
       this.connectionSection(),
     );
     this.monitor.start();
+    this.dashboard.start();
+    // Al cerrar la pestaña, las partidas abiertas se cierran con MATCH_FINISHED y se vacía la cola de eventos.
+    window.addEventListener("pagehide", () => {
+      for (const game of this.running) game.dispose();
+      this.sender.flushOnExit();
+    });
   }
 
   private header(): HTMLElement {
+    const name = el("input", "player-name");
+    name.value = this.profile.name;
+    name.maxLength = 24;
+    name.setAttribute("aria-label", "Nombre del jugador");
+    name.addEventListener("change", () => {
+      this.profile.set(name.value);
+      name.value = this.profile.name;
+    });
     return el(
       "header",
       "top",
       el("h1", "", "GameConsole"),
       el("p", "muted", "Tres juegos, partidas en paralelo y estadísticas en vivo desde GameStats."),
+      el("label", "muted", "Jugador: ", name),
     );
   }
 
@@ -77,6 +102,8 @@ export class ConsoleApp {
     const tab = el("button", "secondary", "Abrir en otra pestaña");
     // Se habilitan cuando el juego esté implementado (game.status === "listo").
     play.disabled = tab.disabled = game.status !== "listo";
+    play.addEventListener("click", () => this.startMatch(game));
+    tab.addEventListener("click", () => window.open(`${location.pathname}?game=${game.id}`, "_blank"));
 
     return el(
       "article",
@@ -88,11 +115,37 @@ export class ConsoleApp {
     );
   }
 
-  private dashboardSection(): HTMLElement {
-    return this.section(
-      "Panel de estadísticas",
-      el("p", "muted", "Pendiente. Mostrará las estadísticas por juego y generales que devuelva GameStats."),
+  private matchesSection(): HTMLElement {
+    return this.section("Partidas en curso", this.matchesEl);
+  }
+
+  /** Abre una partida nueva debajo de las demás; cada una tiene su propio matchId. */
+  private startMatch(entry: GameEntry): void {
+    const game = entry.create?.({ playerId: this.profile.name, sender: this.sender });
+    if (!game) return;
+    this.running.add(game);
+
+    const body = el("div", "match-body");
+    const close = el("button", "secondary", "Cerrar");
+    const card = el(
+      "article",
+      "card match",
+      el("div", "card-head", el("h3", "", entry.title), el("code", "", game.matchId)),
+      body,
+      el("div", "actions", close),
     );
+    close.addEventListener("click", () => {
+      game.dispose();
+      this.running.delete(game);
+      card.remove();
+    });
+    this.matchesEl.prepend(card);
+    game.mount(body);
+  }
+
+  private dashboardSection(): HTMLElement {
+    // Los números vienen de GameStats (se consultan cada 2 s); la consola no calcula nada.
+    return this.section("Panel de estadísticas", this.dashboard.element());
   }
 
   private connectionSection(): HTMLElement {
