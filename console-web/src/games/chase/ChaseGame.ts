@@ -12,8 +12,8 @@ import { CpuRacer, HumanRacer } from "./Racer.ts";
 /** playerId de la CPU en los eventos. El usuario no puede llamarse así (ver PlayerProfile). */
 export const CPU_ID = "cpu";
 
-const CELL = 44; // píxeles por celda
-const BAND = 34; // alto de la franja de arriba (datos) y de abajo (estado)
+const CELL = 48; // píxeles por celda: sprites de 16×16 a 3×
+const BAND = 40; // alto de la franja de arriba (datos) y del cuadro de diálogo de abajo
 
 const KEYS: Readonly<Record<string, Direction>> = {
   ArrowUp: "arriba",
@@ -34,8 +34,8 @@ export interface ChaseOptions {
 }
 
 /**
- * Chase en pantalla: La Buena (tú, "B") y una segunda Buena controlada por
- * Prolog ("C") corren hacia La Mala ("M"). Las reglas están en ChaseMatch; esta
+ * Chase en pantalla: La Buena (tú, el caballero dorado) y una segunda Buena
+ * controlada por Prolog (el caballero azul) corren hacia La Mala (la bruja). Las reglas están en ChaseMatch; esta
  * clase conecta la partida con la consola:
  *
  *  - Extiende Game: la base emite MATCH_STARTED (con matchStartData),
@@ -115,13 +115,11 @@ export class ChaseGame extends Game {
 
   private view(): ChaseView {
     const { match } = this;
-    const hearts = "♥".repeat(match.user.lives) + "♡".repeat(Math.max(0, this.startLives - match.user.lives));
-    const hud = `${this.playerId} · vidas ${hearts} · pasos ${match.user.steps} · CPU pasos ${match.cpu.steps}`;
-
+    const base = { player: this.playerId, maxLives: this.startLives };
     const text = statusText(match, this.playerId);
-    if (this.notice) return { hud, status: `${text} — ${this.notice}`, tone: "notice" };
+    if (this.notice) return { ...base, status: `${text} — ${this.notice}`, tone: "notice" };
     const tone = match.outcome ? (isWin(match.outcome, this.playerId) ? "won" : "lost") : "normal";
-    return { hud, status: text, tone };
+    return { ...base, status: text, tone };
   }
 }
 

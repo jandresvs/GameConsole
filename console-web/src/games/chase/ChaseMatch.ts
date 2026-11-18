@@ -91,6 +91,7 @@ export class ChaseMatch {
       if (this.isFinished()) return;
       this.events.routeComputed(this.user.id, this.user.position, this.board.target, userRoute);
       this.events.routeComputed(this.cpu.id, this.cpu.position, this.board.target, cpuRoute);
+      this.cpu.plan(cpuRoute);
       if (!userRoute.found || !cpuRoute.found) {
         this.finish({ kind: "no-route" });
         return;

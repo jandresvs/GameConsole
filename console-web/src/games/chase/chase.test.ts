@@ -193,6 +193,14 @@ describe("ChaseMatch", () => {
     assertValidContract(sender.events);
   });
 
+  it("la CPU recuerda lo que le falta de su ruta (para dibujarla) y lo va consumiendo", async () => {
+    const { match } = setup({ board: new Board(1, 6, [], P(0, 5)), user: P(0, 0), cpu: P(0, 2) });
+    await match.begin();
+    assert.deepEqual(match.cpu.route.map((p) => p.key()), ["0,3", "0,4", "0,5"]);
+    await match.userMove("derecha"); // después mueve la CPU un paso
+    assert.deepEqual(match.cpu.route.map((p) => p.key()), ["0,4", "0,5"]);
+  });
+
   it("ROUTE_COMPUTED trae los datos del contrato", async () => {
     const { match, sender } = setup({ board: new Board(1, 5, [], P(0, 4), 0), user: P(0, 0), cpu: P(0, 2) });
     await match.begin();

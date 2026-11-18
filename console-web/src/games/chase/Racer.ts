@@ -1,7 +1,7 @@
 import type { Board } from "./Board.ts";
 import type { Direction } from "./Direction.ts";
 import { Position } from "./Position.ts";
-import type { RouteFinder } from "./RouteFinder.ts";
+import type { Route, RouteFinder } from "./RouteFinder.ts";
 
 export type RacerKind = "human" | "cpu";
 
@@ -70,9 +70,30 @@ export class CpuRacer extends Racer {
     return "cpu";
   }
 
+  private planned: readonly Position[] = [];
+
+  /** Lo que falta de la última ruta que dio Prolog (sin la celda actual). Solo para dibujarla. */
+  get route(): readonly Position[] {
+    return this.planned;
+  }
+
+  /** Guarda la ruta que devolvió Prolog desde la celda actual. */
+  plan(route: Route): void {
+    this.planned = route.found ? route.path.map((s) => new Position(s.row, s.col)) : [];
+  }
+
   /** Pregunta la ruta desde su celda actual y devuelve el primer paso; null si no hay ruta. */
   async chooseMove(board: Board, finder: RouteFinder, signal?: AbortSignal): Promise<Direction | null> {
     const route = await finder.findRoute(board, this.position, signal);
+    this.plan(route);
     return route.found && route.path.length > 0 ? route.path[0]!.direction : null;
+  }
+
+  /** Al avanzar, la celda a la que llegó deja de ser parte de lo que falta. */
+  override advance(direction: Direction): { position: Position; turn: boolean } {
+    const result = super.advance(direction);
+    const [next, ...rest] = this.planned;
+    this.planned = next?.equals(result.position) ? rest : [];
+    return result;
   }
 }
