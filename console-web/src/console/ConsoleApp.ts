@@ -128,11 +128,15 @@ export class ConsoleApp {
     this.running.add(game);
 
     const body = el("div", "match-body");
+    const code = el("code", "", game.matchId);
+    game.onMatchIdChange = (id) => {
+      code.textContent = id; // un juego con niveles abre partidas nuevas en la misma tarjeta
+    };
     const close = el("button", "secondary", "Cerrar");
     const card = el(
       "article",
       "card match",
-      el("div", "card-head", el("h3", "", entry.title), el("code", "", game.matchId)),
+      el("div", "card-head", el("h3", "", entry.title), code),
       body,
       el("div", "actions", close),
     );

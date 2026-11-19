@@ -4,6 +4,7 @@ import { Board } from "../src/games/chase/Board.ts";
 import { ChaseMatch } from "../src/games/chase/ChaseMatch.ts";
 import type { Clock } from "../src/games/chase/Clock.ts";
 import type { Direction } from "../src/games/chase/Direction.ts";
+import { LEVELS, LevelProgress } from "../src/games/chase/Levels.ts";
 import { MapBuilder } from "../src/games/chase/MapBuilder.ts";
 import { DIFFICULTIES, HUMAN_COOLDOWN_MS, type Difficulty } from "../src/games/chase/Pace.ts";
 import { Position } from "../src/games/chase/Position.ts";
@@ -237,6 +238,28 @@ describe("HumanRacer", () => {
     assert.equal(r.advance("abajo").turn, true);
     assert.equal(r.steps, 2);
     assert.equal(r.turns, 1);
+  });
+});
+
+describe("LevelProgress", () => {
+  it("empieza en el nivel elegido y cada nivel sube la velocidad de la IA", () => {
+    const speeds = LEVELS.map((d) => DIFFICULTIES[d].cpuIntervalMs);
+    assert.deepEqual([...speeds].sort((a, b) => b - a), speeds, "cada nivel mueve más rápido");
+    const p = new LevelProgress("normal");
+    assert.equal(p.number, 2);
+    assert.equal(p.difficulty, "normal");
+  });
+
+  it("avanza hasta el último nivel y después vuelve al primero", () => {
+    const p = new LevelProgress("facil");
+    const seen = [p.difficulty];
+    while (!p.isLast) {
+      p.advance();
+      seen.push(p.difficulty);
+    }
+    assert.deepEqual(seen, [...LEVELS]);
+    p.advance();
+    assert.equal(p.number, 1);
   });
 });
 

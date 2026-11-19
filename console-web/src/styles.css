@@ -118,3 +118,7 @@ button:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
 .setting { display: flex; flex-direction: column; gap: 0.15rem; font-size: 0.8rem; color: var(--muted); }
 .setting[hidden] { display: none; }
 .settings select, .settings input { font: inherit; padding: 0.3rem 0.5rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
+.chase-level { margin: 0; font-size: 0.8rem; font-weight: 600; color: var(--accent); }
+.chase-level:empty { display: none; }
+.chase-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.chase-actions:empty { display: none; }

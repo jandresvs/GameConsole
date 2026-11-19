@@ -10,6 +10,7 @@ import { ChaseRenderer, racerStyle } from "./ChaseRenderer.ts";
 import { type ChaseSettings, DEFAULT_SETTINGS } from "./ChaseSettingsForm.ts";
 import type { Clock } from "./Clock.ts";
 import type { Direction } from "./Direction.ts";
+import { LevelProgress } from "./Levels.ts";
 import { DIFFICULTIES, HUMAN_COOLDOWN_MS } from "./Pace.ts";
 import { PrologRouteFinder } from "./PrologRouteFinder.ts";
 import { CpuRacer, HumanRacer, type Racer } from "./Racer.ts";
@@ -42,13 +43,15 @@ const WASD: Readonly<Record<string, Direction>> = { w: "arriba", s: "abajo", a: 
  * conecta la partida (ChaseMatch) con el DOM: dibuja, lee el teclado y muestra mensajes.
  */
 export class ChaseGame extends Game {
-  private readonly id: string;
+  private id: string;
   private readonly settings: ChaseSettings;
   private readonly playerId: string;
   private readonly sender: EventSender;
   private readonly clock: Clock | undefined;
   private readonly finder: PrologRouteFinder;
-  private readonly setupAbort = new AbortController();
+  private setupAbort = new AbortController();
+  private readonly levels: LevelProgress;
+  private actionsShown = false;
 
   private match: ChaseMatch | null = null;
   private renderer: ChaseRenderer | null = null;
@@ -63,11 +66,14 @@ export class ChaseGame extends Game {
   private readonly stage = el("div", "chase-stage");
   private readonly status = el("p", "chase-status", "Preparando el mapa con Prolog…");
   private readonly pads = el("div", "chase-pads");
+  private readonly level = el("p", "chase-level");
+  private readonly actions = el("div", "chase-actions");
   private readonly rows = new Map<string, { text: HTMLElement; bar: HTMLProgressElement | null }>();
 
   constructor(opts: ChaseGameOptions) {
     super("chase");
     this.id = `chase-${newId()}`;
+    this.levels = new LevelProgress((opts.settings ?? DEFAULT_SETTINGS).difficulty);
     this.settings = opts.settings ?? DEFAULT_SETTINGS;
     this.playerId = opts.playerId;
     this.sender = opts.sender;
@@ -86,9 +92,9 @@ export class ChaseGame extends Game {
   mount(container: HTMLElement): void {
     this.root.tabIndex = 0;
     this.root.addEventListener("keydown", (event) => this.onKey(event));
-    this.root.append(this.hud, this.stage, this.status, this.pads);
+    this.root.append(this.level, this.hud, this.stage, this.status, this.pads, this.actions);
     container.append(this.root);
-    void this.prepare();
+    this.startRound();
   }
 
   dispose(): void {
@@ -99,6 +105,34 @@ export class ChaseGame extends Game {
     this.unsubscribe?.();
     this.unsubscribe = null;
     this.root.remove();
+  }
+
+  /**
+   * Abre una partida nueva (otro matchId) en esta misma instancia: la primera, el siguiente
+   * nivel, un reintento o una revancha. La partida anterior ya mandó su MATCH_FINISHED.
+   */
+  private startRound(): void {
+    this.setupAbort.abort();
+    this.setupAbort = new AbortController();
+    cancelAnimationFrame(this.frame);
+    this.unsubscribe?.();
+    this.unsubscribe = null;
+    this.match = null;
+    this.renderer = null;
+    this.notice = null;
+    this.actionsShown = false;
+    this.rows.clear();
+    this.hud.replaceChildren();
+    this.pads.replaceChildren();
+    this.actions.replaceChildren();
+    this.stage.replaceChildren();
+
+    this.id = `chase-${newId()}`;
+    this.onMatchIdChange?.(this.id);
+    this.level.textContent =
+      this.settings.mode === "vs-cpu" ? `Nivel ${this.levels.number} de ${this.levels.total} · ${this.levels.label}` : "";
+    this.refresh();
+    void this.prepare();
   }
 
   /** Genera el mapa (Prolog confirma que hay ruta) y, cuando está listo, arranca la partida. */
@@ -112,7 +146,8 @@ export class ChaseGame extends Game {
   }
 
   private start({ board, route }: BuiltMap): void {
-    const { mode, difficulty } = this.settings;
+    const { mode } = this.settings;
+    const difficulty = this.levels.difficulty;
     const humans = [new HumanRacer(this.playerId, board.start, LIVES)];
     if (mode === "vs-human") humans.push(new HumanRacer(secondName(this.settings.player2, this.playerId), board.start, LIVES));
     const cpu =
@@ -218,6 +253,7 @@ export class ChaseGame extends Game {
   }
 
   private refresh(): void {
+    if (this.disposed) return;
     const match = this.match;
     if (!match) {
       this.status.textContent = this.notice ?? "Preparando el mapa con Prolog…";
@@ -229,6 +265,38 @@ export class ChaseGame extends Game {
     this.status.textContent = this.notice ? `${text} — ${this.notice}` : text;
     const lost = match.outcome !== null && !(match.outcome.kind === "won" && this.isHuman(match, match.outcome.winnerId));
     this.status.className = `chase-status ${match.outcome ? (lost ? "lost" : "won") : ""}`;
+    if (match.phase === "finished" && !this.actionsShown) this.showActions(match);
+  }
+
+  /** Al terminar: qué se puede hacer a continuación (siguiente nivel, reintentar o revancha). */
+  private showActions(match: ChaseMatch): void {
+    this.actionsShown = true;
+    const outcome = match.outcome;
+    if (!outcome || (outcome.kind === "abandoned" && !match.error)) return; // cerrada por quien la jugaba
+
+    const button = (label: string, primary: boolean, action: () => void): HTMLButtonElement => {
+      const b = el("button", primary ? "" : "secondary", label);
+      b.addEventListener("click", action);
+      return b;
+    };
+    if (match.mode === "vs-human") {
+      this.actions.replaceChildren(button("Revancha (mapa nuevo)", true, () => this.startRound()));
+      return;
+    }
+    const won = outcome.kind === "won" && this.isHuman(match, outcome.winnerId);
+    const nextLabel = this.levels.isLast ? "Volver al nivel 1" : `Siguiente nivel (${this.nextLabel()})`;
+    const next = button(nextLabel, won, () => {
+      this.levels.advance();
+      this.startRound();
+    });
+    const retry = button("Reintentar este nivel", !won, () => this.startRound());
+    this.actions.replaceChildren(...(won ? [next, retry] : [retry, next]));
+  }
+
+  private nextLabel(): string {
+    const probe = new LevelProgress(this.levels.difficulty);
+    probe.advance();
+    return probe.label;
   }
 
   private updateRow(match: ChaseMatch, racer: Racer): void {
@@ -253,8 +321,12 @@ export class ChaseGame extends Game {
         return match.mode === "vs-cpu"
           ? "¡Ya! Llega a la salida (S) antes que la IA."
           : "¡Ya! Gana quien llegue primero a la salida (S).";
-      case "finished":
-        return outcomeText(match, match.outcome);
+      case "finished": {
+        const text = outcomeText(match, match.outcome);
+        const won = match.outcome?.kind === "won" && this.isHuman(match, match.outcome.winnerId);
+        if (match.mode !== "vs-cpu" || !won) return text;
+        return this.levels.isLast ? `${text} ¡Completaste todos los niveles!` : `${text} Nivel superado.`;
+      }
     }
   }
 

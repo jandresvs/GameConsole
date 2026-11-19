@@ -16,7 +16,13 @@ export abstract class Game {
     this.gameId = gameId;
   }
 
-  /** Identifica esta partida; es el matchId de todos sus eventos. */
+  /**
+   * Quien muestre el matchId lo registra aquí. Un juego con niveles abre una partida
+   * nueva (otro matchId) en la misma instancia y avisa por este medio.
+   */
+  onMatchIdChange: ((matchId: string) => void) | null = null;
+
+  /** Identifica la partida en curso; es el matchId de todos sus eventos. */
   abstract get matchId(): string;
 
   /** Dibuja el juego dentro del contenedor y empieza la partida. */

@@ -7,6 +7,10 @@ Cómo funciona y cómo está organizado el código (`console-web/src/games/chase
 - **Carrera en tiempo real** (sin turnos) por **un mismo mapa** hacia la **salida (S)**, que siempre está en un **borde**.
   Todos empiezan en la misma celda. Mapa por defecto: 10×14, 22 % de obstáculos, 3 vidas.
 - Antes de empezar hay una cuenta regresiva de 3 s.
+- **Niveles (contra la IA):** son 4, de Fácil a Experto, y cada uno es una **partida nueva** (otro `matchId`, con sus
+  propios `MATCH_STARTED` y `MATCH_FINISHED`). Al terminar aparecen botones: si ganas, «Siguiente nivel» y
+  «Reintentar este nivel»; si pierdes, «Reintentar este nivel» y «Siguiente nivel». Tras el último nivel,
+  «Volver al nivel 1». En humano contra humano el botón es «Revancha (mapa nuevo)».
 - **Dos modos**, que se eligen en la tarjeta del juego:
   - **Contra la IA** (usa Prolog) con **dificultad**: la IA mueve sola cada 1 s (Fácil), 0,7 s (Normal),
     0,5 s (Difícil) o 0,35 s (Experto). Cuanto más difícil, más rápido.
@@ -32,6 +36,7 @@ Cómo funciona y cómo está organizado el código (`console-web/src/games/chase
 | `Racer` (abstracta) | Posición, vidas, pasos y giros de quien corre. |
 | `HumanRacer` | Hereda de `Racer`; agrega el cooldown de 0,5 s (`isReady`, `markAction`, `readiness`). |
 | `CpuRacer` | Hereda de `Racer`; agrega su intervalo y `chooseMove`, que le pide la ruta a Prolog. |
+| `LevelProgress` | En qué nivel va el jugador contra la IA; `advance()` sube un nivel y tras el último vuelve al primero. |
 | `Pace` | Constantes de tiempo: cooldown humano y velocidad de la IA por dificultad. |
 | `Clock` / `SystemClock` | El tiempo se inyecta: en las pruebas se usa un reloj manual. |
 | `RouteFinder` (interfaz) | Abstracción de "quien encuentra rutas"; el juego no sabe de HTTP. |
@@ -56,7 +61,7 @@ programa, con su propio emisor.
 
 ```bash
 cd console-web
-npm test      # 33 pruebas: mapa, cooldown, dificultad, IA con Prolog, eventos, partidas simultáneas
+npm test      # 35 pruebas: mapa, cooldown, dificultad, IA con Prolog, eventos, partidas simultáneas
 ```
 
 Se probó también de punta a punta (navegador, Prolog real e ingest de GameStats real): una persona ganó
