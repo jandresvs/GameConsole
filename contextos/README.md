@@ -38,9 +38,9 @@ Hecho:
   de estadísticas que consulta GameStats cada 2 s. `chase` ya está integrado
   sobre la clase `Game` y la capa de eventos.
 
-Sigue: GameStats v1.1 con el resumen por juego en Scala (J3, ya escrito) y las
-instancias por juego en Go (A6), que el panel necesita; CI/CD y deployment (A7);
-prueba de concurrencia, documentación y video.
+- **Instancias por juego en Go** (A6, `pipeline.games` en `/status`), **CI/CD y deployment** (A7: prueba de humo, release de imágenes, README completo).
+
+Sigue: publicar GameStats v1.1 y el release de GameConsole, probar todo con Docker, la prueba de concurrencia y el video.
 
 ## Reglas de esta carpeta
 

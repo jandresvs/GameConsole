@@ -1,12 +1,15 @@
-# Integración continua: en cada push y pull request compila la consola
-# (TypeScript + Vite) y construye las imágenes Docker propias del proyecto.
+# Integración continua: en cada push y pull request
+#   1. compila la consola (TypeScript + Vite) y corre sus pruebas;
+#   2. corre las pruebas de Prolog;
+#   3. levanta el sistema completo con Docker Compose y corre la prueba de humo
+#      (scripts/smoke-test.sh): consola, Prolog y GameStats trabajando juntos.
 #
-# Pendiente (tarea de CI/CD): levantar el compose completo con una prueba de
-# humo y publicar las imágenes en ghcr.io en cada release, como en GameStats.
+# La publicación de imágenes está en release.yml.
 name: CI
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 jobs:
   web:
@@ -36,10 +39,25 @@ jobs:
           docker run --rm -v "$PWD/ai-prolog:/app" -w /app swipl:stable \
             swipl -g run_tests -t halt test_route.pl
 
-  images:
-    name: Imágenes Docker
+  system:
+    name: Sistema completo (prueba de humo)
     runs-on: ubuntu-latest
+    needs: [web, prolog]
     steps:
       - uses: actions/checkout@v4
-      - name: Construir la consola y Prolog
-        run: docker compose build console prolog
+
+      - name: Construir y levantar los cuatro servicios
+        # --wait espera a que los healthchecks de todos digan "healthy".
+        # GameStats se descarga de ghcr.io (GAMESTATS_VERSION, v1.1 por defecto).
+        run: docker compose up -d --build --wait
+
+      - name: Prueba de humo
+        run: bash scripts/smoke-test.sh
+
+      - name: Mostrar logs si algo falló
+        if: failure()
+        run: docker compose logs
+
+      - name: Apagar
+        if: always()
+        run: docker compose down

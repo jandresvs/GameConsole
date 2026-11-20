@@ -24,7 +24,7 @@ El navegador **solo** habla con `console`. Todo lo demás pasa por el proxy.
 | `analyzer` | GameStats, módulo Scala | 8081 | imagen `ghcr.io/ssanscarlos-rgb/gamestats-analyzer` |
 | `gamestats-dashboard` | Panel original de GameStats, solo para depurar | 8090 | perfil `debug` |
 
-La versión de GameStats se elige con `GAMESTATS_VERSION` (por defecto `v1.0`).
+La versión de GameStats se elige con `GAMESTATS_VERSION` (por defecto `v1.1`).
 
 Los puertos 8080 y 8081 son los mismos que usa el compose de GameStats: no se
 pueden tener los dos proyectos levantados a la vez en la misma máquina.

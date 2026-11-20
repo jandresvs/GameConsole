@@ -15,7 +15,7 @@ Cada tarea tiene un criterio de "listo" para saber cuándo soltarla.
 | A4 | **Juego `racing`**: el usuario contra dos o tres pilotos automáticos | Al terminar una carrera, Scala muestra vueltas, choques y patrones | Hecho; falta verlo con Scala levantado |
 | A5 | **Juego `combat`**: el usuario contra bots en una arena | Scala calcula K/D y precisión de la partida | Hecho; falta verlo con Scala levantado |
 | A6 | **Instancias por juego en Go**: partidas abiertas y entregadas por `gameId` en `/status` | Abrir una partida sube el contador de su juego antes de que termine | Hecho en GameStats (`pipeline.games` en `/status`, con pruebas); falta publicar v1.1 |
-| A7 | **CI/CD y deployment**: prueba de humo con el compose, publicación de imágenes por release, instrucciones | Un release deja las imágenes en Packages y el README explica cómo desplegar | CI básico hecho |
+| A7 | **CI/CD y deployment**: prueba de humo con el compose, publicación de imágenes por release, instrucciones | Un release deja las imágenes en Packages y el README explica cómo desplegar | Hecho: `ci.yml` con prueba de humo (`scripts/smoke-test.sh`), `release.yml` publica imágenes y adjunta `gameconsole-images.tar.gz`, README completo. Falta hacer el release y poner los paquetes en público |
 
 ## Jean
 
