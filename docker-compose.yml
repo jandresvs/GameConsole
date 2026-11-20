@@ -57,7 +57,7 @@ services:
   # Inteligencia de juego en SWI-Prolog (la CPU del juego chase).
   prolog:
     build: ./ai-prolog
-    image: ${TRY:-ghcr.io/ssanscarlos-rgb}/gameconsole-prolog:${GAMECONSOLE_VERSION:-latest}
+    image: ${GAMECONSOLE_REGISTRY:-ghcr.io/jandresvs}/gameconsole-prolog:${GAMECONSOLE_VERSION:-latest}
     init: true                     # reenvía la señal de apagado: "down" no espera 10 s
     environment:
       PORT: "8082"
