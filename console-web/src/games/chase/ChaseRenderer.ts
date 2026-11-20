@@ -1,30 +1,17 @@
 import type { ChaseMatch } from "./ChaseMatch.ts";
 import type { Position } from "./Position.ts";
-<<<<<<< Updated upstream
 import type { Racer } from "./Racer.ts";
 import {
-=======
-import type { HumanRacer, Racer } from "./Racer.ts";
-import {
-  EXIT_GATE,
->>>>>>> Stashed changes
   GRASS,
   HEART_EMPTY,
   HEART_FULL,
   KNIGHT_CPU,
-<<<<<<< Updated upstream
-=======
-  KNIGHT_PLAYER2,
->>>>>>> Stashed changes
   KNIGHT_USER,
   OBSTACLES,
   type PixelArt,
   pickFor,
   SPRITE_SIZE,
-<<<<<<< Updated upstream
   VILLAIN,
-=======
->>>>>>> Stashed changes
 } from "./sprites.ts";
 
 const COLORS = {
@@ -38,15 +25,8 @@ const COLORS = {
   boxFill: "#0f1118",
   boxOuter: "#e9dcb0",
   boxInner: "#6b5f3c",
-<<<<<<< Updated upstream
   route: "#f5c542",
   routeEdge: "#8a6a12",
-=======
-  gold: "#f5c542",
-  ready: "#6fe0a0",
-  charging: "#f2c75a",
-  barBack: "#2a2e3a",
->>>>>>> Stashed changes
 } as const;
 
 const FONT = "'Courier New', ui-monospace, monospace";
@@ -56,29 +36,12 @@ const BLINK_MS = 90;
 
 /** Lo que el renderer no puede sacar de la partida. Lo arma ChaseGame. */
 export interface ChaseView {
-<<<<<<< Updated upstream
   readonly player: string;
   readonly maxLives: number;
   readonly status: string;
   readonly tone: "normal" | "won" | "lost" | "notice";
 }
 
-=======
-  readonly maxLives: number;
-  readonly status: string;
-  readonly tone: "normal" | "won" | "lost" | "notice";
-  /** Texto del centro de la franja de arriba: el nivel, o "Humano vs humano". */
-  readonly heading: string;
-  /** Cómo se llama la IA en la franja de arriba (incluye su dificultad). */
-  readonly cpuLabel: string;
-}
-
-/** Nombres largos se acortan para que quepan en la franja de arriba. */
-function shorten(text: string, max: number): string {
-  return text.length <= max ? text : `${text.slice(0, max - 1)}…`;
-}
-
->>>>>>> Stashed changes
 /**
  * Convierte cada PixelArt en una imagen la primera vez que se pide y la
  * guarda. Después dibujar un sprite es un drawImage escalado sin suavizado.
@@ -125,13 +88,8 @@ export class ChaseRenderer {
   private readonly scale: number;
   private readonly facingLeft = new Map<string, boolean>();
   private readonly lastCol = new Map<string, number>();
-<<<<<<< Updated upstream
   private lastLives: number | null = null;
   private hurtUntil = 0;
-=======
-  private readonly lastLives = new Map<string, number>();
-  private readonly hurtUntil = new Map<string, number>();
->>>>>>> Stashed changes
 
   constructor(
     private readonly rows: number,
@@ -163,42 +121,21 @@ export class ChaseRenderer {
 
   // -------------------------------------------------------------- animación
 
-<<<<<<< Updated upstream
   /** Compara con el cuadro anterior: hacia dónde se movió cada uno y si La Buena perdió una vida. */
   private track(match: ChaseMatch, now: number): void {
     for (const racer of [match.user, match.cpu]) {
-=======
-  /** Compara con el cuadro anterior: hacia dónde se movió cada uno y quién perdió una vida. */
-  private track(match: ChaseMatch, now: number): void {
-    for (const racer of match.racers) {
->>>>>>> Stashed changes
       const previous = this.lastCol.get(racer.id);
       const col = racer.position.col;
       if (previous !== undefined && col !== previous) this.facingLeft.set(racer.id, col < previous);
       this.lastCol.set(racer.id, col);
-<<<<<<< Updated upstream
     }
     if (this.lastLives !== null && match.user.lives < this.lastLives) this.hurtUntil = now + HURT_MS;
     this.lastLives = match.user.lives;
-=======
-
-      const lives = this.lastLives.get(racer.id);
-      if (lives !== undefined && racer.lives < lives) this.hurtUntil.set(racer.id, now + HURT_MS);
-      this.lastLives.set(racer.id, racer.lives);
-    }
-  }
-
-  /** El sprite de cada participante: la primera persona dorada, la segunda morada y la IA azul. */
-  private artOf(match: ChaseMatch, racer: Racer): PixelArt {
-    if (racer.kind === "cpu") return KNIGHT_CPU;
-    return match.humans[0] === racer ? KNIGHT_USER : KNIGHT_PLAYER2;
->>>>>>> Stashed changes
   }
 
   // -------------------------------------------------------------- franja de arriba
 
   private drawHud(ctx: CanvasRenderingContext2D, match: ChaseMatch, view: ChaseView): void {
-<<<<<<< Updated upstream
     const mid = this.bandHeight / 2;
     const icon = 2; // los íconos van a 2× (32 px)
     const iconTop = Math.round(mid - (SPRITE_SIZE * icon) / 2);
@@ -229,90 +166,11 @@ export class ChaseRenderer {
     ctx.fillText(cpuText, width - 8, mid);
     const textWidth = ctx.measureText(cpuText).width;
     this.sprite(ctx, KNIGHT_CPU, width - 8 - textWidth - 6 - SPRITE_SIZE * icon, iconTop, icon);
-=======
-    const width = this.cols * this.cell;
-    const [left, right] = match.racers;
-    if (left) this.drawRacerInfo(ctx, match, view, left, "start", 6);
-    if (right) this.drawRacerInfo(ctx, match, view, right, "end", width - 6);
-
-    // Centro: el nivel o el modo.
-    ctx.textBaseline = "middle";
-    ctx.textAlign = "center";
-    ctx.font = `bold 13px ${FONT}`;
-    ctx.fillStyle = COLORS.gold;
-    ctx.fillText(view.heading, width / 2, this.bandHeight / 2 - 5);
-    ctx.font = `12px ${FONT}`;
-    ctx.fillStyle = COLORS.muted;
-    ctx.fillText(formatTime(match.elapsedMs), width / 2, this.bandHeight / 2 + 9);
->>>>>>> Stashed changes
 
     ctx.fillStyle = COLORS.bandLine;
     ctx.fillRect(0, this.bandHeight - 2, width, 2);
   }
 
-<<<<<<< Updated upstream
-=======
-  /**
-   * Los datos de un participante en una esquina de la franja: sprite, nombre, vidas y pasos; si es una
-   * persona, además la barra de recarga (se llena en 0,5 s y es verde cuando ya puede moverse). `edge` es
-   * "start" para la esquina izquierda y "end" para la derecha, donde todo se dibuja de derecha a izquierda.
-   */
-  private drawRacerInfo(
-    ctx: CanvasRenderingContext2D,
-    match: ChaseMatch,
-    view: ChaseView,
-    racer: Racer,
-    edge: "start" | "end",
-    anchor: number,
-  ): void {
-    const mid = this.bandHeight / 2;
-    const icon = 2; // los íconos van a 2× (32 px)
-    const size = SPRITE_SIZE * icon;
-    const iconTop = Math.round(mid - size / 2);
-    const dir = edge === "start" ? 1 : -1;
-    const name = shorten(racer.kind === "cpu" ? view.cpuLabel : racer.id, 11);
-
-    ctx.textBaseline = "middle";
-    ctx.font = `bold 13px ${FONT}`;
-    ctx.textAlign = edge;
-
-    const textY = racer.kind === "human" ? mid - 6 : mid;
-    const iconX = edge === "start" ? anchor : anchor - size;
-    this.sprite(ctx, this.artOf(match, racer), iconX, iconTop, icon);
-    let x = anchor + dir * (size + 6);
-
-    ctx.fillStyle = racer.isEliminated ? COLORS.muted : COLORS.text;
-    ctx.fillText(racer.isEliminated ? `${name} ✗` : name, x, textY);
-    const nameWidth = ctx.measureText(racer.isEliminated ? `${name} ✗` : name).width;
-    x += dir * (nameWidth + 8);
-
-    if (racer.kind === "human") {
-      // Vidas.
-      for (let i = 0; i < view.maxLives; i++) {
-        const heartX = edge === "start" ? x + i * 17 : x - (i + 1) * 17;
-        this.sprite(ctx, i < racer.lives ? HEART_FULL : HEART_EMPTY, heartX, textY - 7, 2);
-      }
-      // Barra de recarga debajo del nombre.
-      const barWidth = 96;
-      const barX = edge === "start" ? anchor + size + 6 : anchor - size - 6 - barWidth;
-      const human = racer as HumanRacer;
-      ctx.fillStyle = COLORS.barBack;
-      ctx.fillRect(barX, mid + 9, barWidth, 5);
-      ctx.fillStyle = human.isReady ? COLORS.ready : COLORS.charging;
-      ctx.fillRect(barX, mid + 9, Math.round(barWidth * human.readiness), 5);
-    } else {
-      ctx.textAlign = edge;
-      ctx.fillStyle = COLORS.muted;
-      ctx.fillText(`pasos ${racer.steps}`, x, textY);
-      return;
-    }
-    ctx.textAlign = edge;
-    ctx.fillStyle = COLORS.muted;
-    ctx.font = `12px ${FONT}`;
-    ctx.fillText(`pasos ${racer.steps}`, edge === "start" ? anchor + size + 6 + 104 : anchor - size - 6 - 104, mid + 11);
-  }
-
->>>>>>> Stashed changes
   // -------------------------------------------------------------- tablero
 
   private drawBoard(ctx: CanvasRenderingContext2D, match: ChaseMatch, now: number): void {
@@ -323,40 +181,20 @@ export class ChaseRenderer {
       }
     }
 
-<<<<<<< Updated upstream
     this.drawRoute(ctx, match.cpu.route, board.target);
 
-=======
-    this.drawStart(ctx, board.start);
->>>>>>> Stashed changes
     for (const o of board.obstacleList()) {
       // Árbol, roca o arbusto: al azar, pero siempre el mismo para la misma celda.
       this.sprite(ctx, pickFor(OBSTACLES, o.row, o.col, 1), o.col * this.cell, o.row * this.cell, this.scale);
     }
 
     const bob = (offset: number) => (Math.floor(now / BOB_MS + offset) % 2) * this.scale;
-<<<<<<< Updated upstream
     this.character(ctx, VILLAIN, board.target, bob(0), false);
     this.character(ctx, KNIGHT_CPU, match.cpu.position, bob(0.5), this.facingLeft.get(match.cpu.id) ?? false);
 
     const hurt = now < this.hurtUntil;
     const hidden = hurt && Math.floor(now / BLINK_MS) % 2 === 0;
     if (!hidden) this.character(ctx, KNIGHT_USER, match.user.position, bob(0.5), this.facingLeft.get(match.user.id) ?? false);
-=======
-    this.character(ctx, EXIT_GATE, board.exit, 0, false);
-
-    // Si varios comparten celda (al inicio todos), se dibujan uno tras otro; el que está en la celda de la salida queda abajo.
-    match.racers.forEach((racer, index) => {
-      const hurt = now < (this.hurtUntil.get(racer.id) ?? 0);
-      if (hurt && Math.floor(now / BLINK_MS) % 2 === 0) return; // parpadea al chocar
-      const eliminated = racer.isEliminated;
-      if (eliminated) ctx.globalAlpha = 0.35;
-      this.character(ctx, this.artOf(match, racer), racer.position, eliminated ? 0 : bob(index * 0.5), this.facingLeft.get(racer.id) ?? false);
-      ctx.globalAlpha = 1;
-    });
-
-    if (match.phase === "countdown") this.drawCountdown(ctx, match);
->>>>>>> Stashed changes
 
     if (match.phase === "finished") {
       ctx.fillStyle = "rgba(10, 12, 18, 0.35)";
@@ -365,7 +203,6 @@ export class ChaseRenderer {
     }
   }
 
-<<<<<<< Updated upstream
   /** La ruta que Prolog le calculó a la CPU, como migas doradas. La del usuario no se muestra: sería regalarle el juego. */
   private drawRoute(ctx: CanvasRenderingContext2D, route: readonly Position[], target: Position): void {
     const dot = this.scale * 2; // 2 píxeles de sprite
@@ -398,46 +235,6 @@ export class ChaseRenderer {
     ctx.strokeRect(x + this.scale / 2, y + this.scale / 2, this.cell - this.scale, this.cell - this.scale);
   }
 
-=======
-  /** La celda de salida del juego (donde empiezan todos): un cuadro punteado. */
-  private drawStart(ctx: CanvasRenderingContext2D, p: Position): void {
-    ctx.strokeStyle = COLORS.muted;
-    ctx.lineWidth = this.scale;
-    ctx.setLineDash([this.scale * 2, this.scale * 2]);
-    ctx.strokeRect(p.col * this.cell + this.scale * 2, p.row * this.cell + this.scale * 2, this.cell - this.scale * 4, this.cell - this.scale * 4);
-    ctx.setLineDash([]);
-  }
-
-  /** Número grande de la cuenta regresiva sobre el tablero. */
-  private drawCountdown(ctx: CanvasRenderingContext2D, match: ChaseMatch): void {
-    const w = this.cols * this.cell;
-    const h = this.rows * this.cell;
-    ctx.fillStyle = "rgba(10, 12, 18, 0.55)";
-    ctx.fillRect(0, 0, w, h);
-    ctx.fillStyle = COLORS.text;
-    ctx.font = `bold ${this.cell * 2}px ${FONT}`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(String(Math.max(1, Math.ceil(match.countdownLeftMs / 1000))), w / 2, h / 2);
-  }
-
-  /** Al terminar, el ganador (si hay) se vuelve a dibujar sin el oscurecido, con un marco dorado. */
-  private highlightWinner(ctx: CanvasRenderingContext2D, match: ChaseMatch): void {
-    const outcome = match.outcome;
-    if (outcome?.kind !== "won") return;
-    const winner = match.racers.find((r) => r.id === outcome.winnerId);
-    if (!winner) return;
-    const x = winner.position.col * this.cell;
-    const y = winner.position.row * this.cell;
-    this.sprite(ctx, pickFor(GRASS, winner.position.row, winner.position.col), x, y, this.scale);
-    this.character(ctx, EXIT_GATE, match.board.exit, 0, false);
-    this.character(ctx, this.artOf(match, winner), winner.position, 0, this.facingLeft.get(winner.id) ?? false);
-    ctx.strokeStyle = COLORS.gold;
-    ctx.lineWidth = this.scale;
-    ctx.strokeRect(x + this.scale / 2, y + this.scale / 2, this.cell - this.scale, this.cell - this.scale);
-  }
-
->>>>>>> Stashed changes
   private character(ctx: CanvasRenderingContext2D, art: PixelArt, p: Position, bob: number, flip: boolean): void {
     const x = p.col * this.cell;
     const y = p.row * this.cell - bob;
@@ -472,11 +269,7 @@ export class ChaseRenderer {
     ctx.fillStyle = view.tone === "normal" ? COLORS.text : COLORS[view.tone];
     ctx.fillText(view.status, m + 12, mid);
 
-<<<<<<< Updated upstream
     // Flechita que parpadea cuando es tu turno, como en los RPG.
-=======
-    // Flechita que parpadea mientras se juega, como en los RPG.
->>>>>>> Stashed changes
     if (match.phase === "playing" && Math.floor(now / 400) % 2 === 0) {
       const ax = width - m - 18;
       ctx.fillStyle = COLORS.boxOuter;
@@ -493,11 +286,4 @@ export class ChaseRenderer {
     const image = this.atlas.get(art);
     ctx.drawImage(image, Math.round(x), Math.round(y), image.width * scale, image.height * scale);
   }
-<<<<<<< Updated upstream
-=======
-}
-
-function formatTime(ms: number): string {
-  return `${(ms / 1000).toFixed(1)} s`;
->>>>>>> Stashed changes
 }

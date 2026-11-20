@@ -3,20 +3,12 @@ import { Dashboard } from "../dashboard/Dashboard";
 import { FanOutEventSink } from "../events/FanOutEventSink";
 import { HttpEventSink } from "../events/HttpEventSink";
 import { LocalEventSink } from "../events/LocalEventSink";
-<<<<<<< Updated upstream
 import type { GameDefinition } from "../games/core/GameDefinition";
-=======
-import type { GameDefinition, GameSettings } from "../games/core/GameDefinition";
->>>>>>> Stashed changes
 import { ServiceMonitor, type ServiceInfo, type ServiceState } from "../services/ServiceMonitor";
 import { DeliveryStatusView } from "./DeliveryStatusView";
 import { el } from "./dom";
 import { EventLogView } from "./EventLogView";
 import { GameCatalog } from "./GameCatalog";
-<<<<<<< Updated upstream
-=======
-import { GameOptionsView, settingsFromParams } from "./GameOptionsView";
->>>>>>> Stashed changes
 import { PlayerProfile } from "./PlayerProfile";
 import { SessionManager } from "./SessionManager";
 
@@ -39,12 +31,7 @@ const STATE_LABEL: Record<ServiceState, string> = {
  * y con la clase base Game.
  *
  * Parámetros de la dirección:
-<<<<<<< Updated upstream
  *   ?game=<id>  abre una partida de ese juego al cargar (así funciona "otra pestaña")
-=======
- *   ?game=<id>  abre una partida de ese juego al cargar (así funciona "otra pestaña"); las
- *               opciones del juego también van en la dirección (?game=chase&mode=vs-human)
->>>>>>> Stashed changes
  *   ?demo       incluye el juego de ejemplo fuera del modo desarrollo
  */
 export class ConsoleApp {
@@ -88,11 +75,7 @@ export class ConsoleApp {
     });
 
     const requested = this.catalog.find(this.params.get("game") ?? "");
-<<<<<<< Updated upstream
     if (requested) this.sessions.open(requested);
-=======
-    if (requested) this.sessions.open(requested, settingsFromParams(requested, this.params));
->>>>>>> Stashed changes
   }
 
   private header(): HTMLElement {
@@ -149,7 +132,6 @@ export class ConsoleApp {
   private gameCard(game: GameDefinition): HTMLElement {
     const ready = game.create !== undefined;
 
-<<<<<<< Updated upstream
     const play = el("button", "", "Nueva partida");
     play.disabled = !ready;
     play.addEventListener("click", () => this.sessions.open(game));
@@ -157,17 +139,6 @@ export class ConsoleApp {
     const tab = el("button", "secondary", "Abrir en otra pestaña");
     tab.disabled = !ready;
     tab.addEventListener("click", () => window.open(this.urlFor(game), "_blank", "noopener"));
-=======
-    const options = new GameOptionsView(game);
-
-    const play = el("button", "", "Nueva partida");
-    play.disabled = !ready;
-    play.addEventListener("click", () => this.sessions.open(game, options.read()));
-
-    const tab = el("button", "secondary", "Abrir en otra pestaña");
-    tab.disabled = !ready;
-    tab.addEventListener("click", () => window.open(this.urlFor(game, options.read()), "_blank", "noopener"));
->>>>>>> Stashed changes
 
     return el(
       "article",
@@ -175,26 +146,14 @@ export class ConsoleApp {
       el("div", "card-head", el("h3", "", game.title), el("code", "", game.id)),
       el("p", "muted", game.description),
       el("p", "status", ready ? "Listo" : "En desarrollo"),
-<<<<<<< Updated upstream
-=======
-      options.element,
->>>>>>> Stashed changes
       el("div", "actions", play, tab),
     );
   }
 
-<<<<<<< Updated upstream
   /** La dirección de esta misma consola que abre directamente una partida del juego. */
   private urlFor(game: GameDefinition): string {
     const url = new URL(window.location.href);
     url.searchParams.set("game", game.id);
-=======
-  /** La dirección de esta misma consola que abre directamente una partida del juego, con los ajustes elegidos. */
-  private urlFor(game: GameDefinition, settings: GameSettings): string {
-    const url = new URL(window.location.href);
-    url.searchParams.set("game", game.id);
-    for (const [id, value] of Object.entries(settings)) url.searchParams.set(id, value);
->>>>>>> Stashed changes
     return url.toString();
   }
 
