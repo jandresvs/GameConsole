@@ -143,7 +143,7 @@ docker compose down
 |---|---|---|
 | `GAMESTATS_VERSION` | `v1.1` | versión de las imágenes de GameStats |
 | `GAMECONSOLE_VERSION` | `latest` | versión de las imágenes propias (`gameconsole-web`, `gameconsole-prolog`) |
-| `GAMECONSOLE_REGISTRY` | `ghcr.io/ssanscarlos-rgb` | registro donde están las imágenes propias |
+| `GAMECONSOLE_REGISTRY` | `ghcr.io/jandresvs` | registro donde están las imágenes propias |
 | `IDLE_TIMEOUT` | `5m` | tiempo sin eventos tras el que GameStats cierra una partida |
 | `CONSOLE_PORT` | `3000` | puerto de la consola en la máquina |
 

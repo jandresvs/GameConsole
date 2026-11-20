@@ -57,7 +57,7 @@ services:
   # Inteligencia de juego en SWI-Prolog (la CPU del juego chase).
   prolog:
     build: ./ai-prolog
-    image: ${GAMECONSOLE_REGISTRY:-ghcr.io/ssanscarlos-rgb}/gameconsole-prolog:${GAMECONSOLE_VERSION:-latest}
+    image: ${TRY:-ghcr.io/ssanscarlos-rgb}/gameconsole-prolog:${GAMECONSOLE_VERSION:-latest}
     init: true                     # reenvía la señal de apagado: "down" no espera 10 s
     environment:
       PORT: "8082"
@@ -74,7 +74,7 @@ services:
   # La consola: nginx con la página (TypeScript ya compilado) y el proxy /api/...
   console:
     build: ./console-web
-    image: ${GAMECONSOLE_REGISTRY:-ghcr.io/ssanscarlos-rgb}/gameconsole-web:${GAMECONSOLE_VERSION:-latest}
+    image: ${GAMECONSOLE_REGISTRY:-ghcr.io/jandresvs}/gameconsole-web:${GAMECONSOLE_VERSION:-latest}
     ports:
       - "${CONSOLE_PORT:-3000}:80"
     depends_on:
