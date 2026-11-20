@@ -47,7 +47,7 @@ la vez el compose del repo de GameStats.
 
 | Variable | Por defecto | Para qué |
 |---|---|---|
-| `GAMESTATS_VERSION` | `v1.0` | versión de las imágenes de GameStats |
+| `GAMESTATS_VERSION` | `v1.1` | versión de las imágenes de GameStats |
 | `IDLE_TIMEOUT` | `5m` | tiempo sin eventos tras el que GameStats cierra una partida |
 | `CONSOLE_PORT` | `3000` | puerto de la consola en la máquina |
 

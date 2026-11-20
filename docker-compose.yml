@@ -16,10 +16,8 @@ name: gameconsole
 services:
   # GameStats, módulo de análisis (Scala). Guarda y expone los resultados.
   analyzer:
-    build: C:\Users\JeanC\Documents\GameStats\analytics-scala
-    image: gamestats-analyzer-local
-    #image: ghcr.io/ssanscarlos-rgb/gamestats-analyzer:${GAMESTATS_VERSION:-v1.0}
-    #platform: linux/amd64          # las imágenes publicadas son amd64; en Mac con chip Apple corren emuladas
+    image: ghcr.io/ssanscarlos-rgb/gamestats-analyzer:${GAMESTATS_VERSION:-v1.1}
+    platform: linux/amd64          # las imágenes publicadas son amd64; en Mac con chip Apple corren emuladas
     ports:
       - "8081:8081"
     healthcheck:
@@ -33,7 +31,7 @@ services:
 
   # GameStats, módulo de ingestión (Go). Aquí llegan los eventos de los juegos.
   ingest:
-    image: ghcr.io/ssanscarlos-rgb/gamestats-go:${GAMESTATS_VERSION:-v1.0}
+    image: ghcr.io/ssanscarlos-rgb/gamestats-go:${GAMESTATS_VERSION:-v1.1}
     platform: linux/amd64
     environment:
       ANALYZER_URL: http://analyzer:8081
@@ -92,7 +90,7 @@ services:
   # (muestra los eventos rechazados y el recorrido de cada evento). Solo a pedido:
   #   docker compose --profile debug up -d     →  http://localhost:8090
   gamestats-dashboard:
-    image: ghcr.io/ssanscarlos-rgb/gamestats-go:${GAMESTATS_VERSION:-v1.0}
+    image: ghcr.io/ssanscarlos-rgb/gamestats-go:${GAMESTATS_VERSION:-v1.1}
     platform: linux/amd64
     command: ["/app/dashboard"]
     environment:
