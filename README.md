@@ -167,6 +167,13 @@ http://localhost:8090: `docker compose --profile debug up -d`.
 | **Racing** | Carrera de 3 vueltas contra tres pilotos automáticos. Chocar con el muro cuesta tiempo | W/↑ acelerar, S/↓ frenar, A/D o ←/→ girar |
 | **Chase** | Carrera hacia la salida de un mapa con obstáculos, contra una CPU que decide con Prolog (4 dificultades) o contra otra persona en el mismo teclado | J1: WASD · J2: flechas |
 
+> **Racing: cuándo aparecen sus estadísticas.** En `racing` las estadísticas llegan a GameStats
+> solo cuando la carrera termina, y eso pasa de dos maneras: **por jugadores**, cuando todos los
+> autos (el usuario y los tres bots) completan las 3 vueltas, o **por tiempo**, 30 segundos después
+> de que llega el primero; quien no alcanzó a terminar queda como no finalizado. Mientras la
+> carrera sigue en curso, el panel ya cuenta la instancia, pero vueltas, choques y patrones
+> aparecen hasta el final.
+
 ## 5. Los juegos y la orientación a objetos
 
 Todos los juegos extienden la clase abstracta `Game` (`games/core/Game.ts`), que se encarga de lo
@@ -258,6 +265,8 @@ calcula ninguna métrica.
 Las instancias suben **al abrir** la partida, sin esperar a que termine. Las estadísticas de
 análisis (Scala) aparecen cuando la partida termina o se cierra por inactividad: GameStats analiza
 partidas completas. Los resultados viven en memoria de GameStats; al reiniciarlo se pierden.
+Por eso las estadísticas de `racing` (vueltas, choques, patrones) aparecen hasta que termina la
+carrera, por jugadores o por tiempo (ver sección 4); las de `combat` y `chase`, al terminar su partida.
 
 ## 9. Desarrollo y pruebas
 
@@ -358,7 +367,7 @@ Los acuerdos completos y las alternativas descartadas están en [`contextos/`](c
 - Una pestaña cerrada a mitad de partida deja la partida abierta hasta que vence `IDLE_TIMEOUT`.
 - Las imágenes de GameStats son `linux/amd64`; en Mac con chip Apple corren emuladas (Docker avisa; es normal).
 - `scripts/*.sh` son de bash: en Windows usar Git Bash o WSL.
-
+- Las estadísticas de una partida de `racing` no están disponibles hasta que la carrera termina; si se abandona, hasta que vence `IDLE_TIMEOUT` (5 min).
 ## 13. Estructura del repositorio
 
 ```
