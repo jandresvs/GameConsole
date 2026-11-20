@@ -66,6 +66,7 @@ export const KNIGHT_CPU: PixelArt = {
   palette: { ...KNIGHT_BASE, C: "#4a8fd9", c: "#2f64a8" },
 };
 
+<<<<<<< Updated upstream
 /** La Mala: bruja de sombrero puntiagudo y ojos rojos. */
 export const VILLAIN: PixelArt = {
   rows: [
@@ -93,6 +94,43 @@ export const VILLAIN: PixelArt = {
     g: "#d9a62e", // hebilla del sombrero
     F: "#a7d39a", // cara
     R: "#ff3b3b", // ojos
+=======
+/** La segunda persona (humano contra humano): el mismo caballero con túnica morada. */
+export const KNIGHT_PLAYER2: PixelArt = {
+  rows: KNIGHT_ROWS,
+  palette: { ...KNIGHT_BASE, C: "#9b6fd6", c: "#6d46a3" },
+};
+
+// ---------------------------------------------------------------- la salida
+
+/** La salida del mapa: un portal de piedra con luz verde. Siempre está en un borde. */
+export const EXIT_GATE: PixelArt = {
+  rows: [
+    "................",
+    "....kkkkkkkk....",
+    "...kLLLLLLLLk...",
+    "..kLLkkkkkkLLk..",
+    "..kLkGGGGGGkLk..",
+    "..kLkGggggGkLk..",
+    "..kLkGgWWgGkLk..",
+    "..kLkGgWWgGkLk..",
+    "..kLkGggggGkLk..",
+    "..kLkGGGGGGkLk..",
+    "..kLkGGGGGGkLk..",
+    "..kLkGGGGGGkLk..",
+    "..kMkGGGGGGkMk..",
+    ".kMMkkkkkkkkMMk.",
+    "..ssssssssssss..",
+    "................",
+  ],
+  palette: {
+    k: OUTLINE,
+    L: "#9aa0a8", // piedra
+    M: "#6c727c",
+    G: "#2e9d62", // luz verde
+    g: "#6fe0a0",
+    W: "#e8fff2",
+>>>>>>> Stashed changes
     s: SHADOW,
   },
 };

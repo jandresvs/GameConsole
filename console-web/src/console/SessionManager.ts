@@ -1,5 +1,9 @@
 import type { GameContext } from "../games/core/Game";
+<<<<<<< Updated upstream
 import type { GameDefinition } from "../games/core/GameDefinition";
+=======
+import type { GameDefinition, GameSettings } from "../games/core/GameDefinition";
+>>>>>>> Stashed changes
 import { el } from "./dom";
 import { GameSessionView } from "./GameSessionView";
 
@@ -18,6 +22,7 @@ export class SessionManager {
     this.element.append(this.empty);
   }
 
+<<<<<<< Updated upstream
   open(definition: GameDefinition): void {
     if (!definition.create) return;
 
@@ -26,6 +31,28 @@ export class SessionManager {
     this.views.add(view);
     this.empty.remove();
     this.element.append(view.element);
+=======
+  open(definition: GameDefinition, settings: GameSettings = {}, replacing?: GameSessionView): void {
+    if (!definition.create) return;
+
+    const context = this.newContext(definition);
+    const game = definition.create(context, settings);
+    const view = new GameSessionView(definition, game, settings, context.playerId, {
+      onClose: (v) => this.close(v),
+      // Una acción al terminar (siguiente nivel, revancha...) abre una partida NUEVA en el mismo lugar.
+      onFollowUp: (v, next) => this.open(definition, next, v),
+    });
+    this.views.add(view);
+    this.empty.remove();
+
+    if (replacing) {
+      replacing.game.dispose();
+      replacing.element.replaceWith(view.element);
+      this.views.delete(replacing);
+    } else {
+      this.element.append(view.element);
+    }
+>>>>>>> Stashed changes
 
     game.start();
     view.focus();
