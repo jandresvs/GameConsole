@@ -1,11 +1,15 @@
 import { API } from "../config";
+import { Dashboard } from "../dashboard/Dashboard";
+import { FanOutEventSink } from "../events/FanOutEventSink";
+import { HttpEventSink } from "../events/HttpEventSink";
 import { LocalEventSink } from "../events/LocalEventSink";
-import type { GameDefinition } from "../games/core/GameDefinition";
-import { ConnectionTest } from "../services/ConnectionTest";
+import type { GameDefinition, GameSettings } from "../games/core/GameDefinition";
 import { ServiceMonitor, type ServiceInfo, type ServiceState } from "../services/ServiceMonitor";
+import { DeliveryStatusView } from "./DeliveryStatusView";
 import { el } from "./dom";
 import { EventLogView } from "./EventLogView";
 import { GameCatalog } from "./GameCatalog";
+import { GameOptionsView, settingsFromParams } from "./GameOptionsView";
 import { PlayerProfile } from "./PlayerProfile";
 import { SessionManager } from "./SessionManager";
 
@@ -28,7 +32,8 @@ const STATE_LABEL: Record<ServiceState, string> = {
  * y con la clase base Game.
  *
  * Parámetros de la dirección:
- *   ?game=<id>  abre una partida de ese juego al cargar (así funciona "otra pestaña")
+ *   ?game=<id>  abre una partida de ese juego al cargar (así funciona "otra pestaña"); las
+ *               opciones del juego también van en la dirección (?game=chase&mode=vs-human)
  *   ?demo       incluye el juego de ejemplo fuera del modo desarrollo
  */
 export class ConsoleApp {
@@ -36,11 +41,17 @@ export class ConsoleApp {
   private readonly catalog = new GameCatalog(import.meta.env.DEV || this.params.has("demo"));
   private readonly player = new PlayerProfile();
 
-  // TEMPORAL: cuando exista la capa de eventos (A3), aquí va el EventSink que envía a GameStats.
-  private readonly eventSink = new LocalEventSink();
+  // Los eventos van a dos destinos: a GameStats (por el proxy) y al registro en pantalla.
+  private readonly eventLog = new LocalEventSink();
+  private readonly delivery = new HttpEventSink({ url: `${API.ingest}/events` });
+  private readonly eventSink = new FanOutEventSink(this.delivery, this.eventLog);
 
-  private readonly sessions = new SessionManager(() => ({ playerId: this.player.id, events: this.eventSink }));
-  private readonly connectionTest = new ConnectionTest();
+  private readonly sessions = new SessionManager((game) => ({
+    playerId: this.player.id,
+    events: game.localOnly ? this.eventLog : this.eventSink,
+  }));
+  // El panel muestra los juegos de la entrega (no el de ejemplo), aunque todavía no tengan partidas.
+  private readonly dashboard = new Dashboard(this.catalog.all().filter((g) => !g.localOnly).map((g) => g.id));
   private readonly badges = new Map<string, HTMLElement>();
   private readonly monitor = new ServiceMonitor(SERVICES, (service, state) => this.showState(service, state));
 
@@ -53,16 +64,20 @@ export class ConsoleApp {
       this.gamesSection(),
       this.section("Partidas abiertas", this.sessions.element),
       this.dashboardSection(),
-      this.eventLogSection(),
-      this.connectionSection(),
+      this.eventsSection(),
     );
     this.monitor.start();
+    this.dashboard.start();
 
-    // Al cerrar o salir de la pestaña, las partidas en curso se dan por abandonadas.
-    window.addEventListener("pagehide", () => this.sessions.abandonAll());
+    // Al cerrar o salir de la pestaña, las partidas en curso se dan por abandonadas
+    // y lo que quede en cola se envía con una petición que sobrevive al cierre.
+    window.addEventListener("pagehide", () => {
+      this.sessions.abandonAll();
+      this.delivery.flushOnExit();
+    });
 
     const requested = this.catalog.find(this.params.get("game") ?? "");
-    if (requested) this.sessions.open(requested);
+    if (requested) this.sessions.open(requested, settingsFromParams(requested, this.params));
   }
 
   private header(): HTMLElement {
@@ -119,13 +134,15 @@ export class ConsoleApp {
   private gameCard(game: GameDefinition): HTMLElement {
     const ready = game.create !== undefined;
 
+    const options = new GameOptionsView(game);
+
     const play = el("button", "", "Nueva partida");
     play.disabled = !ready;
-    play.addEventListener("click", () => this.sessions.open(game));
+    play.addEventListener("click", () => this.sessions.open(game, options.read()));
 
     const tab = el("button", "secondary", "Abrir en otra pestaña");
     tab.disabled = !ready;
-    tab.addEventListener("click", () => window.open(this.urlFor(game), "_blank", "noopener"));
+    tab.addEventListener("click", () => window.open(this.urlFor(game, options.read()), "_blank", "noopener"));
 
     return el(
       "article",
@@ -133,60 +150,30 @@ export class ConsoleApp {
       el("div", "card-head", el("h3", "", game.title), el("code", "", game.id)),
       el("p", "muted", game.description),
       el("p", "status", ready ? "Listo" : "En desarrollo"),
+      options.element,
       el("div", "actions", play, tab),
     );
   }
 
-  /** La dirección de esta misma consola que abre directamente una partida del juego. */
-  private urlFor(game: GameDefinition): string {
+  /** La dirección de esta misma consola que abre directamente una partida del juego, con los ajustes elegidos. */
+  private urlFor(game: GameDefinition, settings: GameSettings): string {
     const url = new URL(window.location.href);
     url.searchParams.set("game", game.id);
+    for (const [id, value] of Object.entries(settings)) url.searchParams.set(id, value);
     return url.toString();
   }
 
   private dashboardSection(): HTMLElement {
-    return this.section(
-      "Panel de estadísticas",
-      el("p", "muted", "Pendiente. Mostrará las estadísticas por juego y generales que devuelva GameStats."),
-    );
+    // Los números vienen de GameStats (se consultan cada 2 s); la consola no calcula nada.
+    return this.section("Panel de estadísticas", this.dashboard.element());
   }
 
-  private eventLogSection(): HTMLElement {
+  private eventsSection(): HTMLElement {
     return this.section(
-      "Eventos emitidos (temporal)",
-      el(
-        "p",
-        "muted",
-        "Lo que emiten las partidas de esta pestaña. Todavía no se envía a GameStats: falta la capa de eventos.",
-      ),
-      new EventLogView(this.eventSink).element,
-    );
-  }
-
-  private connectionSection(): HTMLElement {
-    const output = el("pre", "output", "Aún no se ha ejecutado.");
-    const button = el("button", "secondary", "Enviar evento de prueba");
-
-    button.addEventListener("click", () => {
-      button.disabled = true;
-      output.textContent = "Enviando…";
-      void this.connectionTest.run().then((result) => {
-        output.textContent = result.lines.join("\n");
-        output.className = `output ${result.ok ? "ok" : "fail"}`;
-        button.disabled = false;
-      });
-    });
-
-    return this.section(
-      "Prueba de conexión (temporal)",
-      el(
-        "p",
-        "muted",
-        "Envía una partida mínima del juego ficticio «prueba» a GameStats, pasando por el proxy. " +
-          "Sirve para comprobar el esqueleto y se quitará cuando exista la capa de eventos.",
-      ),
-      button,
-      output,
+      "Envío de eventos",
+      new DeliveryStatusView(this.delivery).element,
+      el("p", "muted small", "Últimos eventos emitidos por las partidas de esta pestaña (hora en UTC):"),
+      new EventLogView(this.eventLog).element,
     );
   }
 

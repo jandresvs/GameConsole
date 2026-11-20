@@ -16,8 +16,10 @@ name: gameconsole
 services:
   # GameStats, módulo de análisis (Scala). Guarda y expone los resultados.
   analyzer:
-    image: ghcr.io/ssanscarlos-rgb/gamestats-analyzer:${GAMESTATS_VERSION:-v1.0}
-    platform: linux/amd64          # las imágenes publicadas son amd64; en Mac con chip Apple corren emuladas
+    build: C:\Users\JeanC\Documents\GameStats\analytics-scala
+    image: gamestats-analyzer-local
+    #image: ghcr.io/ssanscarlos-rgb/gamestats-analyzer:${GAMESTATS_VERSION:-v1.0}
+    #platform: linux/amd64          # las imágenes publicadas son amd64; en Mac con chip Apple corren emuladas
     ports:
       - "8081:8081"
     healthcheck:

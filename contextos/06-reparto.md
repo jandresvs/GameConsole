@@ -11,9 +11,9 @@ Cada tarea tiene un criterio de "listo" para saber cuándo soltarla.
 |---|---|---|---|
 | A1 | **Esqueleto**: repo, proyecto TypeScript, nginx, compose con GameStats, página de la consola | Con `docker compose up`, un evento enviado desde el navegador aparece en `/status` del ingest | Hecho (falta probarlo con Docker; ver el README) |
 | A2 | **Contrato entre consola y juegos**: clase base `Game` (ciclo de vida, `matchId`, actualizar, dibujar) e interfaz `EventSender` | Jean puede escribir `ChaseGame` sin preguntar; queda explicado en esta carpeta | Hecho: ver `07-contrato-juegos.md` |
-| A3 | **Capa de eventos**: arma los eventos, los encola, los envía por lotes en segundo plano y reintenta con el mismo `eventId` | Dos partidas simultáneas envían eventos y `/rejected` queda vacío | Pendiente |
-| A4 | **Juego `racing`**: el usuario contra dos o tres pilotos automáticos | Al terminar una carrera, Scala muestra vueltas, choques y patrones | Pendiente |
-| A5 | **Juego `combat`**: el usuario contra bots en una arena | Scala calcula K/D y precisión de la partida | Pendiente |
+| A3 | **Capa de eventos**: arma los eventos, los encola, los envía por lotes en segundo plano y reintenta con el mismo `eventId` | Dos partidas simultáneas envían eventos y `/rejected` queda vacío | Hecho: `HttpEventSink` |
+| A4 | **Juego `racing`**: el usuario contra dos o tres pilotos automáticos | Al terminar una carrera, Scala muestra vueltas, choques y patrones | Hecho; falta verlo con Scala levantado |
+| A5 | **Juego `combat`**: el usuario contra bots en una arena | Scala calcula K/D y precisión de la partida | Hecho; falta verlo con Scala levantado |
 | A6 | **Instancias por juego en Go**: partidas abiertas y entregadas por `gameId` en `/status` | Abrir una partida sube el contador de su juego antes de que termine | Pendiente |
 | A7 | **CI/CD y deployment**: prueba de humo con el compose, publicación de imágenes por release, instrucciones | Un release deja las imágenes en Packages y el README explica cómo desplegar | CI básico hecho |
 
@@ -21,12 +21,17 @@ Cada tarea tiene un criterio de "listo" para saber cuándo soltarla.
 
 | # | Tarea | Listo cuando | Estado |
 |---|---|---|---|
-| J1 | **Servicio Prolog**: A\* con el contrato de `05-prolog.md` | Responde bien con `curl` a un tablero con ruta y a uno sin ruta | Pendiente (se puede empezar ya) |
-| J2 | **Juego `chase`**: tablero, La Mala fija, el usuario contra la CPU guiada por Prolog | Una partida completa aparece en Scala con estadísticas de los dos jugadores | Pendiente (se puede empezar; para llegar a GameStats necesita A3) |
-| J3 | **Resumen por juego en Scala**: `GET /results/games` con datos por juego y totales | El panel muestra "por juego" y "general" sin sumar nada por su cuenta | Pendiente |
-| J4 | **Panel de estadísticas** dentro de la consola, con consulta periódica | Los números cambian mientras hay partidas abiertas, sin recargar | Pendiente |
+| J1 | **Servicio Prolog**: A\* con el contrato de `05-prolog.md` | Responde bien con `curl` a un tablero con ruta y a uno sin ruta | Hecho (falta probarlo con Docker) |
+| J2 | **Juego `chase`**: tablero, La Mala fija, el usuario contra la CPU guiada por Prolog | Una partida completa aparece en Scala con estadísticas de los dos jugadores | Juego hecho e integrado sobre la clase `Game` y la capa de eventos (ver `08-chase.md`); falta verlo en Scala |
+| J3 | **Resumen por juego en Scala**: `GET /results/games` con datos por juego y totales | El panel muestra "por juego" y "general" sin sumar nada por su cuenta | Escrito en `GameStats` (`/results/games`, contrato 3.5 y 4.3); falta compilarlo y correr `sbt test` |
+| J4 | **Panel de estadísticas** dentro de la consola, con consulta periódica | Los números cambian mientras hay partidas abiertas, sin recargar | Hecho en `console-web/src/dashboard/` (consulta cada 2 s); falta verlo con partidas reales |
 
 Notas:
+
+- **Formato que el panel espera de A6** (para acordarlo con Andrés): `GET /status` →
+  `pipeline.games` = `{ "chase": { "opened": 3, "delivered": 2 }, ... }`, donde `opened` son
+  las partidas abiertas desde que arrancó el ingest (incluye las en curso) y `delivered` las
+  ya entregadas a Scala. Mientras no exista, el panel muestra «—» en instancias.
 
 - J1 no depende de nada: el servicio solo recibe un estado y devuelve una ruta.
 - Para J4 se puede adaptar buena parte del panel de GameStats

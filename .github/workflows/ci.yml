@@ -26,6 +26,16 @@ jobs:
       - run: npm test
       - run: npm run build     # tsc --noEmit (tipos) + vite build
 
+  prolog:
+    name: Servicio Prolog (pruebas)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pruebas de route.pl (incluye comparación con fuerza bruta)
+        run: |
+          docker run --rm -v "$PWD/ai-prolog:/app" -w /app swipl:stable \
+            swipl -g run_tests -t halt test_route.pl
+
   images:
     name: Imágenes Docker
     runs-on: ubuntu-latest

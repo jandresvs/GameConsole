@@ -1,8 +1,10 @@
 # 07 · Contrato entre la consola y los juegos
 
 Cómo se escribe un juego para que la consola lo pueda ofrecer, abrir varias
-veces a la vez y enviar sus eventos. El ejemplo completo y funcionando está en
-`console-web/src/games/example/ExampleGame.ts`.
+veces a la vez y enviar sus eventos. Hay dos ejemplos funcionando:
+
+- `console-web/src/games/example/ExampleGame.ts`: el mínimo, en un archivo.
+- `console-web/src/games/racing/`: un juego completo de la entrega (ver abajo).
 
 ## La idea
 
@@ -135,19 +137,55 @@ otra pestaña**. Cada juego va en su carpeta: `src/games/racing/`,
 
 - `npm run dev` y abrir http://localhost:5173. En desarrollo aparece una cuarta
   tarjeta, **Ejemplo**, para ver el contrato funcionando.
-- La sección **Eventos emitidos** muestra en vivo lo que emite cada partida de
-  la pestaña (la hora sale en UTC).
+- La sección **Envío de eventos** muestra en vivo lo que emite cada partida de
+  la pestaña (la hora sale en UTC) y si GameStats lo está aceptando.
 - `npm test` corre las pruebas automáticas.
 - En la versión de Docker el ejemplo no aparece, porque la entrega lleva
   exactamente tres juegos. Para verlo ahí: http://localhost:3000/?demo
 
-## Lo que falta (tarea A3)
+## Racing como modelo para los demás juegos
 
-Los eventos todavía **no llegan a GameStats**. Hoy van a `LocalEventSink`, que
-solo los muestra en pantalla. La capa de eventos lo reemplaza por un `EventSink`
-que encola, envía por lotes a `/api/ingest/events` y reintenta. Es un cambio de
-una línea en `ConsoleApp.ts`; los juegos no se enteran.
+`racing` separa las reglas del dibujo, y conviene copiar esa forma:
 
-Para esa tarea: al cerrar la pestaña, la consola abandona las partidas en curso
-y emite sus últimos eventos en ese momento, así que el envío tiene que poder
-salir aunque la página se esté cerrando.
+| Archivo | Qué hace | Toca el navegador |
+|---|---|---|
+| `Track.ts`, `tracks.ts` | La pista: geometría, curvatura, proyección de un punto | No |
+| `Car.ts`, `PlayerCar.ts`, `BotCar.ts` | Los autos: uno con física y teclado, los bots con reglas | No |
+| `LapTracker.ts` | Cuenta vueltas y mide sus tiempos | No |
+| `Race.ts` | Las reglas de la carrera; avisa choques, vueltas y el final | No |
+| `RaceRenderer.ts` | Dibuja la carrera en el canvas | Sí |
+| `RacingGame.ts` | Extiende `Game`: lee el teclado, llama a `Race` y convierte sus avisos en eventos | Sí |
+
+Como `Race` no depende del navegador, las pruebas corren carreras enteras en
+milisegundos con un piloto automático (`testing/Autopilot.ts`) y revisan que
+los eventos salgan como los espera el analizador de Scala.
+
+`combat` sigue la misma forma: `CombatMatch` tiene las reglas, `CombatRenderer`
+dibuja y `CombatGame` extiende `Game` y además escucha el ratón sobre
+`this.canvas`. Para el ratón hay que convertir las coordenadas de pantalla a
+las del canvas, porque en pantalla puede verse más chico (ver
+`listenToPointer` en `CombatGame.ts`).
+
+Para números al azar, usar `Random` (`src/games/core/Random.ts`) con semilla
+en vez de `Math.random()`: así una partida se puede repetir igual en una prueba.
+
+## Cómo llegan los eventos a GameStats
+
+El juego no hace nada especial: `this.emit(...)` entrega el evento a un
+`EventSink` y ahí termina su parte. La consola conecta dos destinos:
+
+- **`HttpEventSink`** (`src/events/HttpEventSink.ts`): encola el evento y lo
+  envía por lotes a `/api/ingest/events`. Si la red falla o GameStats no
+  responde, reintenta el mismo lote con esperas crecientes. Al cerrar la
+  pestaña manda lo pendiente con una petición que sobrevive al cierre.
+- **`LocalEventSink`**: guarda los últimos eventos para mostrarlos en la
+  sección **Envío de eventos** de la consola.
+
+En esa sección también se ve el estado del envío: cuántos eventos hay en cola,
+cuántos aceptó o rechazó GameStats y cuántos reintentos hubo. Si un juego emite
+un evento mal formado, GameStats lo rechaza y el motivo sale en la consola del
+navegador y en `GET /api/ingest/rejected`.
+
+El juego de ejemplo lleva `localOnly: true` en su definición: sus eventos solo
+se muestran en pantalla, para que `example` no aparezca en las estadísticas.
+Los tres juegos reales **no** deben llevar esa bandera.

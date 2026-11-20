@@ -44,6 +44,7 @@ export class ExampleGame extends Game {
     title: "Ejemplo",
     description: "Juego mínimo de referencia para escribir los demás. Solo aparece en desarrollo.",
     controls: "Flechas o WASD para moverse. Toca tres objetivos. Con T saltas a un lugar al azar.",
+    localOnly: true, // "example" no es un juego de la entrega: no debe aparecer en las estadísticas
     create: (context) => new ExampleGame(context),
   };
 

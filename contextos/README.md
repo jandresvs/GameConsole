@@ -15,8 +15,9 @@ Leer en este orden:
 | [`05-prolog.md`](05-prolog.md) | Contrato propuesto del servicio Prolog |
 | [`06-reparto.md`](06-reparto.md) | Tareas de cada uno, criterio de "listo" y calendario |
 | [`07-contrato-juegos.md`](07-contrato-juegos.md) | Cómo escribir un juego: la clase base `Game` y sus reglas |
+| [`08-chase.md`](08-chase.md) | Reglas y clases del juego `chase` |
 
-## Estado actual (16 de noviembre)
+## Estado actual (18 de noviembre)
 
 Hecho:
 
@@ -24,12 +25,22 @@ Hecho:
   servicio Prolog que solo responde `/health`, el compose y un CI básico.
 - El **contrato entre la consola y los juegos** (A2): la clase base `Game`, la
   consola abre varias partidas a la vez o en otra pestaña, y hay un juego de
-  ejemplo solo para desarrollo. Ya se puede escribir un juego.
+  ejemplo solo para desarrollo.
+- La **capa de eventos** (A3): los eventos de los juegos llegan a GameStats,
+  con cola, envío por lotes, reintentos y envío al cerrar la pestaña.
+- **`racing`** (A4): el usuario contra tres bots, a tres vueltas. Sirve de
+  ejemplo completo de cómo se escribe un juego (ver `07-contrato-juegos.md`).
+- **`combat`** (A5): todos contra todos en una arena, el usuario contra tres
+  bots, hasta 8 eliminaciones.
 
-Sigue: la capa de eventos que envía a GameStats (A3, Andrés), y el servicio
-Prolog con A\* (J1, Jean), que no depende de lo anterior. Con A2 hecho, Jean
-también puede empezar `chase` (J2); sus eventos se verán en pantalla, pero no
-llegarán a GameStats hasta que exista A3.
+- **El servicio Prolog, `chase` y el panel** (J1, J2 y J4, Jean): A\* en
+  `ai-prolog/route.pl`, `chase` contra la CPU que decide con Prolog, y el panel
+  de estadísticas que consulta GameStats cada 2 s. `chase` ya está integrado
+  sobre la clase `Game` y la capa de eventos.
+
+Sigue: GameStats v1.1 con el resumen por juego en Scala (J3, ya escrito) y las
+instancias por juego en Go (A6), que el panel necesita; CI/CD y deployment (A7);
+prueba de concurrencia, documentación y video.
 
 ## Reglas de esta carpeta
 

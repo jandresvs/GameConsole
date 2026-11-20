@@ -1,5 +1,5 @@
 import type { GameContext } from "../games/core/Game";
-import type { GameDefinition } from "../games/core/GameDefinition";
+import type { GameDefinition, GameSettings } from "../games/core/GameDefinition";
 import { el } from "./dom";
 import { GameSessionView } from "./GameSessionView";
 
@@ -13,19 +13,31 @@ export class SessionManager {
   private readonly empty = el("p", "muted", "No hay partidas abiertas. Elige un juego arriba.");
   private readonly views = new Set<GameSessionView>();
 
-  /** newContext se llama al abrir cada partida, para tomar el nombre de jugador vigente. */
-  constructor(private readonly newContext: () => GameContext) {
+  /** newContext se llama al abrir cada partida: toma el nombre de jugador vigente y el destino de eventos del juego. */
+  constructor(private readonly newContext: (definition: GameDefinition) => GameContext) {
     this.element.append(this.empty);
   }
 
-  open(definition: GameDefinition): void {
+  open(definition: GameDefinition, settings: GameSettings = {}, replacing?: GameSessionView): void {
     if (!definition.create) return;
 
-    const game = definition.create(this.newContext());
-    const view = new GameSessionView(definition, game, (v) => this.close(v));
+    const context = this.newContext(definition);
+    const game = definition.create(context, settings);
+    const view = new GameSessionView(definition, game, settings, context.playerId, {
+      onClose: (v) => this.close(v),
+      // Una acción al terminar (siguiente nivel, revancha...) abre una partida NUEVA en el mismo lugar.
+      onFollowUp: (v, next) => this.open(definition, next, v),
+    });
     this.views.add(view);
     this.empty.remove();
-    this.element.append(view.element);
+
+    if (replacing) {
+      replacing.game.dispose();
+      replacing.element.replaceWith(view.element);
+      this.views.delete(replacing);
+    } else {
+      this.element.append(view.element);
+    }
 
     game.start();
     view.focus();

@@ -6,9 +6,9 @@ Tres juegos orientados a objetos (**combat**, **racing** y **chase**), partidas
 en paralelo, una CPU que decide con **Prolog**, y estadísticas en vivo que vienen
 de [GameStats](https://github.com/ssanscarlos-rgb/GameStats), el proyecto 1.
 
-> **Estado: en construcción.** La consola ya abre partidas (varias a la vez o
-> en otra pestaña) con un juego de ejemplo, pero todavía no están los tres
-> juegos, el envío de eventos a GameStats ni el panel. Los acuerdos del proyecto,
+> **Estado: en construcción.** Los tres juegos se pueden jugar, varias partidas
+> a la vez o en otra pestaña, y sus eventos llegan a GameStats. El panel ya
+> está, pero necesita GameStats v1.1 para mostrar el resumen por juego. Los acuerdos del proyecto,
 > el reparto y lo que sigue están en [`contextos/`](contextos/README.md).
 
 ```
@@ -32,8 +32,8 @@ docker compose ps
 Los cuatro servicios deben decir `healthy`. Luego abrir **http://localhost:3000**.
 
 - La sección **Servicios** debe mostrar los tres "en línea".
-- El botón **Enviar evento de prueba** manda una partida mínima a GameStats por
-  el proxy y muestra la respuesta. Es temporal.
+- La sección **Envío de eventos** muestra cuántos eventos aceptó GameStats y si
+  hay algo en cola o reintentándose.
 
 Apagar:
 
@@ -90,7 +90,7 @@ GameConsole/
 ├── docker-compose.yml     sistema completo
 ├── contextos/             acuerdos del proyecto: decisiones, eventos, reparto
 ├── console-web/           la consola: TypeScript + Vite, servida por nginx
-├── ai-prolog/             servicio de inteligencia en SWI-Prolog
+├── ai-prolog/             servicio de inteligencia en SWI-Prolog (A* para chase)
 └── .github/workflows/     CI
 ```
 

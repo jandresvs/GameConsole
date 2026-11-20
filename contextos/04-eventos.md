@@ -9,6 +9,16 @@ La referencia oficial es `docs/CONTRACT.md` del repo de GameStats (secciones 2 y
 varias partidas y juegos. Respuesta `202` con cuántos se aceptaron y cuáles se
 rechazaron, cada uno con su motivo.
 
+De eso se encarga `HttpEventSink`, no los juegos. Junta los eventos de todas las
+partidas de la pestaña y los envía por lotes cada 250 ms, de a una petición a
+la vez y en el orden en que se emitieron.
+
+| Respuesta de GameStats | Qué hace la consola |
+|---|---|
+| `202` | Da el lote por entregado; cuenta aceptados y rechazados |
+| Sin respuesta, `5xx`, `408` o `429` | Reintenta el mismo lote: espera 0,5 s y duplica la espera hasta 8 s |
+| Otro `4xx` | Descarta el lote: la petición es inválida y repetirla daría lo mismo |
+
 ## Formato
 
 ```json
@@ -64,6 +74,11 @@ Comunes a los tres: `MATCH_STARTED`, `PLAYER_JOINED` (uno por jugador) y
 Con eso Scala calcula K/D, precisión, daño promedio y los patrones
 `KILL_STREAK` y `COMEBACK`.
 
+En GameConsole: arena `La Plaza`, el usuario más `bot-1` (rifle), `bot-2`
+(escopeta) y `bot-3` (pistola), todos contra todos. `MATCH_STARTED` lleva
+además `arena` y `killsToWin` (8); Scala no los usa, pero no molestan. Armas:
+`rifle` (34 de daño), `pistola` (25) y `escopeta` (50).
+
 ### `racing`
 
 | `type` | `playerId` | `data` |
@@ -75,6 +90,10 @@ Con eso Scala calcula K/D, precisión, daño promedio y los patrones
 
 Las posiciones no se envían: Scala las reconstruye con los tiempos. Patrones:
 `FASTEST_LAP`, `COMEBACK`, `CLEAN_RACE`.
+
+En GameConsole: pista `Circuito Arenal`, 3 vueltas, el usuario más `bot-1`,
+`bot-2` y `bot-3`. Quien no completa las vueltas antes del cierre no manda más
+`LAP_COMPLETED`; Scala lo ordena por vueltas completadas y después por tiempo.
 
 ### `chase`
 

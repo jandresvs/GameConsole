@@ -16,4 +16,10 @@ describe("PlayerProfile.clean", () => {
     expect(PlayerProfile.clean("")).toBe("jugador");
     expect(PlayerProfile.clean("¡¿?!")).toBe("jugador");
   });
+
+  it("no deja usar el playerId de la CPU ni de los bots", () => {
+    expect(PlayerProfile.clean("CPU")).toBe("cpu_1");
+    expect(PlayerProfile.clean("bot-2")).toBe("bot-2_1");
+    expect(PlayerProfile.clean("cpus")).toBe("cpus");
+  });
 });

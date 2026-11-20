@@ -4,10 +4,7 @@ import { el } from "./dom";
 
 const MAX_LINES = 40;
 
-/**
- * TEMPORAL: muestra los últimos eventos que emiten los juegos, para revisarlos
- * mientras no exista el envío real a GameStats.
- */
+/** Muestra los últimos eventos que emiten las partidas de esta pestaña, para revisarlos mientras se juega. */
 export class EventLogView {
   readonly element = el("pre", "output log", "Todavía no se ha emitido ningún evento.");
   private readonly lines: string[] = [];
