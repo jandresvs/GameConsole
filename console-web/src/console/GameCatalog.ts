@@ -1,40 +1,40 @@
-export type GameStatus = "pendiente" | "listo";
-
-export interface GameEntry {
-  /** gameId del contrato de GameStats: en minúsculas, Scala elige el analizador con él. */
-  readonly id: string;
-  readonly title: string;
-  readonly description: string;
-  readonly status: GameStatus;
-}
+import type { GameDefinition } from "../games/core/GameDefinition";
+import { ExampleGame } from "../games/example/ExampleGame";
 
 /**
- * Los juegos que la consola sabe ofrecer. Cuando exista la clase base de los
- * juegos (tarea 2), cada entrada traerá además la fábrica que crea una partida.
+ * Los juegos que la consola ofrece. Para agregar uno: importar su definición
+ * y ponerla en la lista. Mientras una entrada no tenga `create`, el juego
+ * aparece como "en desarrollo".
  */
 export class GameCatalog {
-  private readonly entries: readonly GameEntry[] = [
+  private readonly definitions: GameDefinition[] = [
     {
       id: "combat",
       title: "Combat",
       description: "Arena vista desde arriba: disparos, daño y eliminaciones contra bots.",
-      status: "pendiente",
     },
     {
       id: "racing",
       title: "Racing",
       description: "Carrera por vueltas contra pilotos automáticos, con choques que cuestan tiempo.",
-      status: "pendiente",
     },
     {
       id: "chase",
       title: "Chase",
       description: "La Buena vs La Mala: carrera contra una CPU que decide su ruta con Prolog (A*).",
-      status: "pendiente",
     },
   ];
 
-  all(): readonly GameEntry[] {
-    return this.entries;
+  /** includeExample agrega el juego de ejemplo; la entrega lleva exactamente tres juegos. */
+  constructor(includeExample: boolean) {
+    if (includeExample) this.definitions.push(ExampleGame.definition);
+  }
+
+  all(): readonly GameDefinition[] {
+    return this.definitions;
+  }
+
+  find(id: string): GameDefinition | undefined {
+    return this.definitions.find((d) => d.id === id);
   }
 }

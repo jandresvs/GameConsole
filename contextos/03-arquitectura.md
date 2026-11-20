@@ -58,10 +58,13 @@ GameConsole/
 │   └── src/
 │       ├── main.ts             punto de entrada
 │       ├── config.ts           rutas de la API
-│       ├── console/            la pantalla principal y el catálogo de juegos
+│       ├── console/            la pantalla principal: catálogo, partidas abiertas, jugador
+│       ├── games/
+│       │   ├── core/           clase base Game, GameDefinition y teclado
+│       │   ├── example/        juego de ejemplo (solo desarrollo)
+│       │   └── combat/, racing/, chase/   (por crear) una carpeta por juego
+│       ├── events/             eventos por partida (MatchEvents) y la interfaz EventSink
 │       ├── services/           estado de los servicios; prueba de conexión (temporal)
-│       ├── events/             capa de eventos (por ahora solo los identificadores)
-│       ├── games/              (por crear) clase base y una carpeta por juego
 │       └── dashboard/          (por crear) panel de estadísticas
 ├── ai-prolog/                  servicio Prolog
 │   ├── Dockerfile
@@ -71,6 +74,7 @@ GameConsole/
 
 ## Cómo se evita mezclar partidas
 
-- Cada partida es un objeto con su propio estado y su propio `matchId`.
+- Cada partida es un objeto `Game` con su propio estado, su propio `matchId` y su propio teclado
+  (ver `07-contrato-juegos.md`).
 - El servicio Prolog no guarda nada entre llamadas: el juego le manda el estado completo.
 - Cada pestaña del navegador es un programa aparte, con sus propias partidas.

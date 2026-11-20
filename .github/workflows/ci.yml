@@ -23,6 +23,7 @@ jobs:
           cache: npm
           cache-dependency-path: console-web/package-lock.json
       - run: npm ci
+      - run: npm test
       - run: npm run build     # tsc --noEmit (tipos) + vite build
 
   images:
