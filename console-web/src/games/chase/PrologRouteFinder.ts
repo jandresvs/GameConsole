@@ -3,7 +3,6 @@ import { isDirection } from "./Direction.ts";
 import type { Position } from "./Position.ts";
 import type { Route, RouteFinder, RouteStep } from "./RouteFinder.ts";
 
-/** El servicio respondió, pero con algo que no se puede usar. Reintentar no lo arregla. */
 export class RouteServiceError extends Error {}
 
 export interface PrologRouteFinderOptions {

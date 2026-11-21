@@ -5,10 +5,10 @@ Proyecto 2 del curso Lenguajes de Programación (TEC).
 
 Tres juegos (**combat**, **racing** y **chase**) escritos con clases en TypeScript, partidas en
 paralelo, una CPU que decide con **Prolog** (A\*) y un panel de estadísticas en vivo que consulta
-a [GameStats](https://github.com/ssanscarlos-rgb/GameStats) (el proyecto 1).
-
-- **Video de la demostración:** `<PEGAR AQUÍ EL LINK PÚBLICO DEL VIDEO>`
-- **Integrantes:** `<NOMBRE 1>` · `<NOMBRE 2>`
+a [GameStats](https://github.com/ssanscarlos-rgb/GameStats) (El proyecto 1).
+[GameConsole](https://github.com/jandresvs/GameConsole) (El proyecto 2)
+- **Video de la demostración:** (https://drive.google.com/file/d/1edMF3-1IClxcGi6zMwBUrnPMq_zjVgf5/view?usp=sharing)
+- **Integrantes:** Jean Carlos Huertas Piedra - Andres Valerio Salas
 
 ## Contenido
 
